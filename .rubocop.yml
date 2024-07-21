@@ -1,5 +1,11 @@
+require:
+  - rubocop-rspec
+
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  SuggestExtensions:
+    rubocop-rake: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

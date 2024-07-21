@@ -10,11 +10,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Ruby ${{ matrix.ruby }}
+    name: Ruby ${{ matrix.ruby }} on ${{ matrix.workdir }}
     strategy:
       matrix:
         ruby:
+          - head
           - '3.3.4'
+          - '3.2.4'
+          - '3.1.5'
+        workdir:
+          - gems/factrey
 
     steps:
     - uses: actions/checkout@v4
@@ -22,6 +27,8 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
+        working-directory: ${{ matrix.workdir }}
         bundler-cache: true
     - name: Run the default task
       run: bundle exec rake
+      working-directory: ${{ matrix.workdir }}
