@@ -1,10 +1,14 @@
 {
 	"folders": [
 		{
+			"name": "(repository root)",
 			"path": "."
 		},
 		{
 			"path": "gems/factrey"
+		},
+		{
+			"path": "gems/factory_bot-blueprint"
 		}
 	],
 	"settings": {}
