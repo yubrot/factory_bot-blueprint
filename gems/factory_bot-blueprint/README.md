@@ -1,6 +1,6 @@
 # FactoryBot::Blueprint
 
-FactoryBot::Bluepirnt is a FactoryBot extension for building structured objects using a declarative DSL.
+FactoryBot::Blueprint is a FactoryBot extension for building structured objects using a declarative DSL.
 On the DSL, the factories defined in FactoryBot can be used without any additional configuration.
 
 For more details, see [the repository root README](/README.md).
