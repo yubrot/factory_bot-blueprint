@@ -9,6 +9,9 @@
 		},
 		{
 			"path": "gems/factory_bot-blueprint"
+		},
+		{
+			"path": "gems/factory_bot-blueprint-rspec"
 		}
 	],
 	"settings": {}

@@ -1,9 +1,8 @@
-# `factrey` gem
+# `factory_bot-blueprint-rspec` gem
 
 This is a part of [FactoryBot::Blueprint](https://github.com/yubrot/factory_bot-blueprint) library.
 
-Factrey provides a declarative DSL to represent the creation plan of objects, for FactoryBot::Blueprint.
-The name Factrey is derived from the words factory and tree.
+`factory_bot-blueprint` integration for RSpec.
 
 ## License
 

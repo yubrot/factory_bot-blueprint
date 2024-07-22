@@ -59,7 +59,7 @@ module FactoryBot
       # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
       # @yield Write Blueprint DSL code here
       # @return [Hash{Symbol => Object}]
-      def build(blueprint = nil, ext: nil, &) = plan(blueprint, ext:, &).instantiate(strategy: :build)
+      def build(blueprint = nil, ext: nil, &) = instantiate(:build, blueprint, ext:, &)
 
       # Create a set of objects by <code>create</code> strategy in FactoryBot.
       # See {.plan} for more details.
@@ -67,7 +67,14 @@ module FactoryBot
       # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
       # @yield Write Blueprint DSL code here
       # @return [Hash{Symbol => Object}]
-      def create(blueprint = nil, ext: nil, &) = plan(blueprint, ext:, &).instantiate(strategy: :create)
+      def create(blueprint = nil, ext: nil, &) = instantiate(:create, blueprint, ext:, &)
+
+      # @!visibility private
+      def instantiate(strategy, blueprint = nil, ext: nil, &)
+        raise ArgumentError, "Unsupported strategy: #{strategy}" unless %i[create build].include?(strategy)
+
+        plan(blueprint, ext:, &).instantiate(strategy:)
+      end
     end
   end
 end
