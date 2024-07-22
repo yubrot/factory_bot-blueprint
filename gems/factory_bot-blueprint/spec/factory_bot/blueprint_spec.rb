@@ -42,17 +42,17 @@ RSpec.describe FactoryBot::Blueprint do
       subject do
         build do
           let.user(name: "A") do
-            let(:user_profile).profile
+            let(:user_account).account
             let(:user_post).post
             let(:user_comment).comment
           end
           let.author(name: "B") do
-            let(:author_profile).profile
+            let(:author_account).account
             let(:author_post).post
             let(:author_comment).comment
           end
           let.commenter(name: "C") do
-            let(:commenter_profile).profile
+            let(:commenter_account).account
             let(:commenter_post).post
             let(:commenter_comment).comment
           end
@@ -75,9 +75,9 @@ RSpec.describe FactoryBot::Blueprint do
 
       it "is considered to be compatible with the base type" do
         expect(subject).to include(
-          user_profile: Test::Profile.new(user: subject[:user]),
-          author_profile: Test::Profile.new(user: subject[:author]),
-          commenter_profile: Test::Profile.new(user: subject[:commenter]),
+          user_account: Test::Account.new(user: subject[:user]),
+          author_account: Test::Account.new(user: subject[:author]),
+          commenter_account: Test::Account.new(user: subject[:commenter]),
         )
       end
     end
@@ -130,6 +130,41 @@ RSpec.describe FactoryBot::Blueprint do
           photo_tag: Test::Tag.new(taggable: subject[:photo]),
           photo_photo_tag: Test::Tag.new(taggable: subject[:photo_photo]),
           photo_video_tag: Test::Tag.new(taggable: subject[:photo_video]),
+        )
+      end
+    end
+
+    context "with FactoryBot inline associations" do
+      subject do
+        build do
+          let.school(name: "S") do
+            let(:a).student(name: "A")
+            let(:b).profile(name: "B")
+            let(:c).student(name: "C") { let(:cp).profile(name: "CP") }
+          end
+        end
+      end
+
+      it "resolves associations" do
+        expect(subject).to include(
+          a: have_attributes(
+            school: subject[:school],
+            profile: have_attributes(school: subject[:school], student: subject[:a]),
+          ),
+          b: have_attributes(
+            school: subject[:school],
+            student: have_attributes(school: subject[:school], profile: subject[:b]),
+          ),
+        )
+      end
+
+      it "resolves inline associations" do
+        pending "inline associations are unsupported for now"
+        expect(subject).to include(
+          cp: have_attributes(school: subject[:school], student: subject[:c]),
+          # NOTE: Even if we could handle inline associations correctly,
+          # it would be difficult to prevent profiles from being created here:
+          c: have_attributes(school: subject[:school], profile: subject[:cp]),
         )
       end
     end

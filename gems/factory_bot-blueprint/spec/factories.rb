@@ -6,13 +6,13 @@ module Test
   User = Struct.new(:name)
   Post = Struct.new(:title, :author)
   Comment = Struct.new(:text, :commenter)
-  Profile = Struct.new(:user)
+  Account = Struct.new(:user)
 
   FactoryBot.define do
     factory(:user, class: "Test::User", aliases: %i[author commenter])
     factory(:post, class: "Test::Post") { author }
     factory(:comment, class: "Test::Comment") { commenter }
-    factory(:profile, class: "Test::Profile") { user }
+    factory(:account, class: "Test::Account") { user }
   end
 
   # TESTING parent
@@ -46,5 +46,24 @@ module Test
         taggable factory: :photo # TESTING same attribute
       end
     end
+  end
+
+  # TESTING inline associations
+  Student = Struct.new(:school, :profile, :name)
+  Profile = Struct.new(:school, :student, :name)
+  School = Struct.new(:name)
+
+  FactoryBot.define do
+    factory :student, class: "Test::Student" do
+      school
+      profile { association :profile, student: instance, school: }
+    end
+
+    factory :profile, class: "Test::Profile" do
+      school
+      student { association :student, profile: instance, school: }
+    end
+
+    factory :school, class: "Test::School"
   end
 end
