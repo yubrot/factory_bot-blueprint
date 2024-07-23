@@ -78,11 +78,9 @@ For example, with these factories:
 
 ```ruby
 FactoryBot.define do
-  FactoryBot.define do
-    factory(:author)
-    factory(:blog) { author }
-    factory(:article) { blog }
-  end
+  factory(:author)
+  factory(:blog) { author }
+  factory(:article) { blog }
 end
 ```
 
@@ -149,7 +147,7 @@ instance => { author:, blog: }
 This auto-reference will work automatically for any association of any traits in the FactoryBot's factory definition. [^2] [^3]
 
 [^2]: Except [inline associations](https://thoughtbot.github.io/factory_bot/associations/inline-definition.html). It seems that it is difficult to support this
-[^3]: See [blueprint_spec.rb](/gems/factory_bot-blueprint/spec/factory_bot/blueprint_spec.rb) (together with [factories.rb](/gems/factory_bot-blueprint/spec/factories.rb)) for detailed behavior
+[^3]: See [blueprint_spec.rb](./gems/factory_bot-blueprint/spec/factory_bot/blueprint_spec.rb) (together with [factories.rb](./gems/factory_bot-blueprint/spec/factories.rb)) for detailed behavior
 
 #### Extending the existing blueprints
 
@@ -200,7 +198,7 @@ def bp = FactoryBot::Blueprint.plan { user(id: user_id) } # ERROR: Unknown type:
 
 To avoid this, you can use the `ext:` option to refer to it as `ext` from the DSL. [^4]
 
-[^4] Or you can use local variables alternatively
+[^4]: Or you can use local variables alternatively
 
 ```ruby
 def user_id = 123
