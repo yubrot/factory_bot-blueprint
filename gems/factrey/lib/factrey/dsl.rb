@@ -110,7 +110,7 @@ module Factrey
     #     # Add title to `article2`
     #     on.article2(title: "This is an article 2")
     #   end
-    def on(name = nil, ...)
+    def on(name = nil, *args, **kwargs)
       return On.new(self) if name.nil? && !block_given?
 
       node = @blueprint.nodes[name]
@@ -118,7 +118,8 @@ module Factrey
 
       stashed_ancestors = @ancestors
       @ancestors = node.ancestors + [node]
-      args(...)
+      args(*args, **kwargs)
+      yield if block_given?
       @ancestors = stashed_ancestors
       node
     end
@@ -137,7 +138,6 @@ module Factrey
 
       @ancestors.last.args.concat(args)
       @ancestors.last.kwargs.update(kwargs)
-      yield if block_given?
     end
 
     class << self
