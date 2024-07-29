@@ -41,7 +41,7 @@ module FactoryBot
         #     end
         #
         #     # Simplest example:
-        #     # This is equivalent to `let_blueprint_build blog_bp: { representative: :blog }`
+        #     # This is equivalent to `let_blueprint_build blog_bp: { result: :blog }`
         #     let_blueprint_build blog_bp: :blog
         #
         #     # Another shorthand example:
@@ -49,15 +49,15 @@ module FactoryBot
         #     let_blueprint_build blog_bp: %i[blog article]
         #
         #     # Most flexible example:
-        #     #   :representative specifies the name of the representative object to be declared. Defaults to nil
+        #     #   :result specifies the name of the result object to be declared. Defaults to nil
         #     #   :items specifies the names of the objects to be declared. Defaults to []
         #     #   :instance specifies the name of the instance object to be declared. Defaults to :"#{source}_instance"
-        #     let_blueprint_build blog_bp: { representative: :blog, items: %i[article], instance: :blog_instance }
+        #     let_blueprint_build blog_bp: { result: :blog, items: %i[article], instance: :blog_instance }
         #
         #     # Above example will be expanded to:
         #     let(:blog_instance) { ::FactoryBot::Blueprint.build(blog_bp) }  # the instance object
-        #     let(:blog) { blog_instance[blog_bp.representative_node.name] }  # the representative object
-        #     let(:article) { blog_instance[:article] }                       # the item objects
+        #     let(:blog) { blog_instance[0] }                                 # the result object
+        #     let(:article) { blog_instance[1][:article] }                    # the item objects
         #   end
         def let_blueprint_build(**map) = let_blueprint_instantiate(:build, **map)
 
@@ -79,7 +79,7 @@ module FactoryBot
             definition =
               case definition
               when Symbol
-                { representative: definition }
+                { result: definition }
               when Array
                 { items: definition }
               when Hash
@@ -88,13 +88,11 @@ module FactoryBot
                 raise TypeError, "definition must be one of Symbol, Array, Hash"
               end
 
-            representative_name = definition[:representative]
+            result_name = definition[:result]
             item_names = definition[:items] || []
             instance = definition[:instance] || :"#{source}_instance"
 
-            if representative_name && !representative_name.is_a?(Symbol)
-              raise TypeError, "representative must be a Symbol"
-            end
+            raise TypeError, "result must be a Symbol" if result_name && !result_name.is_a?(Symbol)
             if !item_names.is_a?(Array) || !item_names.all? { _1.is_a?(Symbol) }
               raise TypeError, "items must be an Array of Symbols"
             end
@@ -104,13 +102,9 @@ module FactoryBot
               let(instance) { ::FactoryBot::Blueprint.instantiate(strategy, __send__(source)) }
             end
 
-            if representative_name
-              let(representative_name) { __send__(instance)[__send__(source).representative_node.name] }
-            end
+            let(result_name) { __send__(instance)[0] } if result_name
 
-            item_names.each do |name|
-              let(name) { __send__(instance)[name] }
-            end
+            item_names.each { |name| let(name) { __send__(instance)[1][name] } }
           end
         end
 
@@ -119,7 +113,7 @@ module FactoryBot
         #
         # This is a shorthand for {#let_blueprint} with {#let_blueprint_build} or {#let_blueprint_create}.
         # @param name [Symbol]
-        #   name of the representative object to be declared using RSpec's <code>let</code>.
+        #   name of the result object to be declared using RSpec's <code>let</code>.
         #   It is also used as a name prefix of the blueprint
         # @param items [Array<Symbol>] names of the objects to be declared using RSpec's <code>let</code>
         # @param inherit [Boolean] whether to extend the blueprint by <code>super()</code>
@@ -145,7 +139,7 @@ module FactoryBot
         #         article(title: "Article 3")
         #       end
         #     end
-        #     let_blueprint_create blog_blueprint: { representative: :blog, items: %i[article] }
+        #     let_blueprint_create blog_blueprint: { result: :blog, items: %i[article] }
         #   end
         def letbp(name, items = [], inherit: false, strategy: :create, &)
           raise TypeError, "name must be a Symbol" unless name.is_a?(Symbol)
@@ -154,7 +148,7 @@ module FactoryBot
           strategy = nil if inherit
 
           let_blueprint(source, inherit:, &)
-          let_blueprint_instantiate strategy, source => { representative: name, items: }
+          let_blueprint_instantiate strategy, source => { result: name, items: }
         end
       end
     end

@@ -18,50 +18,63 @@ module Factrey
         @blueprint = blueprint
       end
 
-      # @param node [Node]
-      # @return [Object]
-      def visit(node)
-        @objects.fetch(node.name) do
-          unless @visited.add?(node.name)
-            raise ArgumentError, "Circular references detected around #{node.type_annotated_name}"
-          end
+      def instantiate_objects
+        @blueprint.nodes.each_value { ensure_object_instantiated(_1) }
+        @objects
+      end
 
-          @objects[node.name] = instantiate_object(node)
-        end
+      def instantiate_result
+        instantiate_objects # To keep consistency in the order of instantiation
+        resolver.resolve(@blueprint.result)
       end
 
       private
 
       # @param node [Node]
       # @return [Object]
-      def instantiate_object(node)
-        resolver = Ref::Resolver.new(recursion_limit: 5) do |name|
-          visit(
-            @blueprint.nodes.fetch(name) do
-              raise ArgumentError, "Missing definition #{name} around #{node.type_annotated_name}"
-            end,
-          )
-        end
-
-        args = resolver.resolve(node.args)
-        kwargs = resolver.resolve(node.kwargs)
-
-        # Resolve auto references to the ancestors
-        auto_references = {}
-        node.type.auto_references.each do |type_name, attribute|
-          next if kwargs.member? attribute # explicitly specified
-
-          compatible_ancestor, index = node.ancestors.reverse_each.with_index.find do |ancestor, _|
-            ancestor.type.compatible_types.include?(type_name)
+      def ensure_object_instantiated(node)
+        @objects.fetch(node.name) do
+          unless @visited.add?(node.name)
+            raise ArgumentError, "Circular references detected around #{node.type_annotated_name}"
           end
-          next unless compatible_ancestor
-          next if auto_references.member?(attribute) && auto_references[attribute][1] <= index
 
-          auto_references[attribute] = [compatible_ancestor, index]
+          args = resolver.resolve(node.args)
+          kwargs = resolver.resolve(node.kwargs)
+          resolve_auto_references(node.type.auto_references, node.ancestors, kwargs)
+          @objects[node.name] = node.type.factory.call(node.type, @context, *args, **kwargs)
         end
-        auto_references.each { |attribute, (ancestor, _)| kwargs[attribute] = visit(ancestor) }
+      end
 
-        node.type.factory.call(node.type, @context, *args, **kwargs)
+      # @return [Ref::Resolver]
+      def resolver
+        @resolver ||= Ref::Resolver.new(recursion_limit: 5) do |name|
+          node = @blueprint.nodes.fetch(name) { raise ArgumentError, "Missing definition: #{name}" }
+          ensure_object_instantiated(node)
+        end
+      end
+
+      # @param auto_references [Hash{Symbol => Symbol}]
+      # @param referenceable_nodes [Array<Node>]
+      # @param dest [Hash{Symbol => Object}]
+      def resolve_auto_references(auto_references, referenceable_nodes, dest)
+        candidates = {}
+        auto_references.each do |type_name, attribute|
+          next if dest.member? attribute # this attribute is explicitly specified
+
+          compatible_node, index = referenceable_nodes.reverse_each.with_index.find do |node, _|
+            node.type.compatible_types.include?(type_name)
+          end
+          next unless compatible_node
+
+          # the node closest to the end of the array has priority
+          next if candidates.member?(attribute) && candidates[attribute][1] <= index
+
+          candidates[attribute] = [compatible_node, index]
+        end
+
+        candidates.each do |attribute, (node, _)|
+          dest[attribute] = ensure_object_instantiated(node)
+        end
       end
     end
   end

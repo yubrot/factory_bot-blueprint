@@ -51,11 +51,27 @@ RSpec.describe Factrey::DSL do
   end
 
   describe "Blueprint DSL" do
-    def blueprint(&) = Factrey.blueprint(dsl:, ext:, &)
+    def blueprint(blueprint = nil, &) = Factrey.blueprint(blueprint, dsl:, ext:, &)
 
     let(:ext) { nil }
 
     before { [user, blog, post, comment].each { dsl.add_type _1 } }
+
+    describe "results" do
+      subject { blueprint { 123 } }
+
+      it "defines the result" do
+        expect(subject.result).to eq 123
+      end
+
+      context "when the blueprint is extended" do
+        subject { blueprint(blueprint { 123 }) { 456 } }
+
+        it "does not overwrite the result" do
+          expect(subject.result).to eq 123
+        end
+      end
+    end
 
     describe "#node" do
       # We use #node through helper methods defined by .add_type

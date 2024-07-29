@@ -46,15 +46,11 @@ RSpec.describe Factrey::Blueprint do
     end
   end
 
-  describe "#representative_node" do
-    subject { blueprint.representative_node }
-
-    it "returns the last root node" do
-      expect(subject).to eq blueprint.nodes[:bar]
-    end
+  describe "#add_node" do # rubocop:disable RSpec/RepeatedExampleGroupBody
+    it "is covered by the Factrey::DSL spec"
   end
 
-  describe "#add_node" do
+  describe "#define_result" do # rubocop:disable RSpec/RepeatedExampleGroupBody
     it "is covered by the Factrey::DSL spec"
   end
 

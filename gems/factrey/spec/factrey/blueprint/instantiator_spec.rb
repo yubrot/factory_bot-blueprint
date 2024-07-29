@@ -18,7 +18,7 @@ RSpec.describe Factrey::Blueprint::Instantiator do
 
     context "with an empty blueprint" do
       it "creates no objects" do
-        expect(subject).to eq({})
+        expect(subject).to eq([nil, {}])
       end
     end
 
@@ -28,7 +28,19 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects" do
-        expect(subject).to eq(foo: [:create, :author, 1, :hello, { hoge: "fuga" }])
+        expect(subject[0]).to be_nil
+        expect(subject[1]).to eq(foo: [:create, :author, 1, :hello, { hoge: "fuga" }])
+      end
+    end
+
+    context "with single node and result" do
+      before do
+        blueprint.add_node(:foo, author, args: [1, :hello], kwargs: { hoge: "fuga" })
+        blueprint.define_result(ref.foo)
+      end
+
+      it "creates objects and computes the result" do
+        expect(subject[0]).to eq(subject[1][:foo])
       end
     end
 
@@ -39,7 +51,7 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           foo: [:create, :author, {}],
           bar: [:create, :blog, {}],
         )
@@ -53,9 +65,9 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           bar: [:create, :blog, {}],
-          foo: [:create, :author, subject[:bar], {}],
+          foo: [:create, :author, subject[1][:bar], {}],
         )
       end
     end
@@ -68,10 +80,10 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           foo: [:create, :author, { follows: [] }],
-          bar: [:create, :author, { follows: [subject[:foo]] }],
-          baz: [:create, :author, { follows: [subject[:foo], subject[:bar]] }],
+          bar: [:create, :author, { follows: [subject[1][:foo]] }],
+          baz: [:create, :author, { follows: [subject[1][:foo], subject[1][:bar]] }],
         )
       end
     end
@@ -105,10 +117,10 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects with auto references" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           foo: [:create, :author, {}],
-          bar: [:create, :blog, { author: subject[:foo] }],
-          baz: [:create, :post, { blog: subject[:bar] }],
+          bar: [:create, :blog, { author: subject[1][:foo] }],
+          baz: [:create, :post, { blog: subject[1][:bar] }],
         )
       end
     end
@@ -121,10 +133,10 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects with auto references and the nearest ancestor is selected" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           foo: [:create, :author, {}],
           bar: [:create, :author, {}],
-          baz: [:create, :blog, { author: subject[:bar] }],
+          baz: [:create, :blog, { author: subject[1][:bar] }],
         )
       end
     end
@@ -136,9 +148,9 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects with auto references and compatible types are also considered" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           foo: [:create, :guest_author, {}],
-          bar: [:create, :blog, { author: subject[:foo] }],
+          bar: [:create, :blog, { author: subject[1][:foo] }],
         )
       end
     end
@@ -151,10 +163,10 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       end
 
       it "creates objects and explicit arguments take precedence" do
-        expect(subject).to eq(
+        expect(subject[1]).to eq(
           foo: [:create, :author, {}],
           bar: [:create, :author, {}],
-          baz: [:create, :blog, { author: subject[:foo] }],
+          baz: [:create, :blog, { author: subject[1][:foo] }],
         )
       end
     end

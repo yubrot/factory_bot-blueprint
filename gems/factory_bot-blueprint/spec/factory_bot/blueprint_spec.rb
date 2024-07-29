@@ -16,16 +16,36 @@ RSpec.describe FactoryBot::Blueprint do
       subject { build }
 
       it "creates no objects" do
-        expect(subject.values).to eq []
+        expect(subject).to eq [nil, {}]
       end
     end
 
     context "with a node" do
       subject { build { user } }
 
-      it "creates a object" do
-        expect(subject.values).to eq [
+      it "creates a object and the object is used as a result" do
+        expect(subject[0]).to eq subject[1].values.first
+        expect(subject[1].values).to eq [
           Test::User.new,
+        ]
+      end
+    end
+
+    context "with multiple nodes" do
+      subject do
+        build do
+          user(name: "A")
+          user(name: "B")
+          user(name: "C")
+        end
+      end
+
+      it "creates objects and the last object is used as a result" do
+        expect(subject[0]).to eq subject[1].values.last
+        expect(subject[1].values).to eq [
+          Test::User.new(name: "A"),
+          Test::User.new(name: "B"),
+          Test::User.new(name: "C"),
         ]
       end
     end
@@ -60,24 +80,24 @@ RSpec.describe FactoryBot::Blueprint do
       end
 
       it "is not considered to be compatible with aliases (behaves as inherited factories)" do
-        expect(subject).to include(
+        expect(subject[1]).to include(
           user: Test::User.new(name: "A"),
           user_post: Test::Post.new(author: Test::User.new),
           user_comment: Test::Comment.new(commenter: Test::User.new),
           author: Test::User.new(name: "B"),
-          author_post: Test::Post.new(author: subject[:author]),
+          author_post: Test::Post.new(author: subject[1][:author]),
           author_comment: Test::Comment.new(commenter: Test::User.new),
           commenter: Test::User.new(name: "C"),
           commenter_post: Test::Post.new(author: Test::User.new),
-          commenter_comment: Test::Comment.new(commenter: subject[:commenter]),
+          commenter_comment: Test::Comment.new(commenter: subject[1][:commenter]),
         )
       end
 
       it "is considered to be compatible with the base type" do
-        expect(subject).to include(
-          user_account: Test::Account.new(user: subject[:user]),
-          author_account: Test::Account.new(user: subject[:author]),
-          commenter_account: Test::Account.new(user: subject[:commenter]),
+        expect(subject[1]).to include(
+          user_account: Test::Account.new(user: subject[1][:user]),
+          author_account: Test::Account.new(user: subject[1][:author]),
+          commenter_account: Test::Account.new(user: subject[1][:commenter]),
         )
       end
     end
@@ -91,11 +111,11 @@ RSpec.describe FactoryBot::Blueprint do
       end
 
       it "is considered to be compatible with the base type and the first association takes precedence" do
-        expect(subject).to include(
+        expect(subject[1]).to include(
           rgb: Test::RGB.new(code: "red"),
-          rgb_grad: Test::Gradient.new(from: subject[:rgb], to: Test::RGB.new),
+          rgb_grad: Test::Gradient.new(from: subject[1][:rgb], to: Test::RGB.new),
           rgba: Test::RGBA.new(code: "blue"),
-          rgba_grad: Test::Gradient.new(from: subject[:rgba], to: Test::RGB.new),
+          rgba_grad: Test::Gradient.new(from: subject[1][:rgba], to: Test::RGB.new),
         )
       end
     end
@@ -117,19 +137,19 @@ RSpec.describe FactoryBot::Blueprint do
       end
 
       it "knows the possible associations and the nearest ancestor takes precedence" do
-        expect(subject).to include(
+        expect(subject[1]).to include(
           video: Test::Video.new(title: "A"),
           video_photo: Test::Photo.new(title: "A-1"),
           video_video: Test::Video.new(title: "A-2"),
           photo: Test::Photo.new(title: "B"),
           photo_photo: Test::Photo.new(title: "B-1"),
           photo_video: Test::Video.new(title: "B-2"),
-          video_tag: Test::Tag.new(taggable: subject[:video]),
-          video_photo_tag: Test::Tag.new(taggable: subject[:video_photo]),
-          video_video_tag: Test::Tag.new(taggable: subject[:video_video]),
-          photo_tag: Test::Tag.new(taggable: subject[:photo]),
-          photo_photo_tag: Test::Tag.new(taggable: subject[:photo_photo]),
-          photo_video_tag: Test::Tag.new(taggable: subject[:photo_video]),
+          video_tag: Test::Tag.new(taggable: subject[1][:video]),
+          video_photo_tag: Test::Tag.new(taggable: subject[1][:video_photo]),
+          video_video_tag: Test::Tag.new(taggable: subject[1][:video_video]),
+          photo_tag: Test::Tag.new(taggable: subject[1][:photo]),
+          photo_photo_tag: Test::Tag.new(taggable: subject[1][:photo_photo]),
+          photo_video_tag: Test::Tag.new(taggable: subject[1][:photo_video]),
         )
       end
     end
@@ -146,25 +166,25 @@ RSpec.describe FactoryBot::Blueprint do
       end
 
       it "resolves associations" do
-        expect(subject).to include(
+        expect(subject[1]).to include(
           a: have_attributes(
-            school: subject[:school],
-            profile: have_attributes(school: subject[:school], student: subject[:a]),
+            school: subject[1][:school],
+            profile: have_attributes(school: subject[1][:school], student: subject[1][:a]),
           ),
           b: have_attributes(
-            school: subject[:school],
-            student: have_attributes(school: subject[:school], profile: subject[:b]),
+            school: subject[1][:school],
+            student: have_attributes(school: subject[1][:school], profile: subject[1][:b]),
           ),
         )
       end
 
       it "resolves inline associations" do
         pending "inline associations are unsupported for now"
-        expect(subject).to include(
-          cp: have_attributes(school: subject[:school], student: subject[:c]),
+        expect(subject[1]).to include(
+          cp: have_attributes(school: subject[1][:school], student: subject[1][:c]),
           # NOTE: Even if we could handle inline associations correctly,
           # it would be difficult to prevent profiles from being created here:
-          c: have_attributes(school: subject[:school], profile: subject[:cp]),
+          c: have_attributes(school: subject[1][:school], profile: subject[1][:cp]),
         )
       end
     end

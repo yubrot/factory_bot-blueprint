@@ -10,6 +10,8 @@ module Factrey
   class Blueprint
     # @return [Hash{Symbol => Node}] a set of nodes
     attr_reader :nodes
+    # @return [Object] the result of the DSL code is defined here
+    attr_reader :result
 
     # Creates an empty blueprint.
     def initialize
@@ -34,10 +36,6 @@ module Factrey
       result
     end
 
-    # Get the last root node.
-    # @return [Node, nil]
-    def representative_node = nodes.each_value.reverse_each.find(&:root?)
-
     # Add a node. This method is used by {DSL} and usually does not need to be called directly.
     # @return [Node]
     def add_node(...)
@@ -48,15 +46,23 @@ module Factrey
       node
     end
 
-    # Create a set of objects based on this blueprint.
+    # Define the result. This method is used by {DSL} and usually does not need to be called directly.
+    # @param result [Object]
+    # @param overwrite [Boolean] whether to overwrite the existing result
+    def define_result(result, overwrite: false)
+      return if defined?(@result) && !overwrite
+
+      @result = result
+    end
+
+    # Create a set of objects and compute the result based on this blueprint.
     # @param context [Object] context object to be passed to the factories
-    # @return [Hash{Symbol => Object}]
+    # @return [(Object, {Symbol => Object})] the result and the created objects
     def instantiate(context = nil)
       instantiator = Instantiator.new(context, self)
-
-      nodes.each_value { instantiator.visit(_1) }
-
-      instantiator.objects
+      objects = instantiator.instantiate_objects
+      result = instantiator.instantiate_result
+      [result, objects]
     end
   end
 end
