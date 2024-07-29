@@ -26,7 +26,7 @@ This document assumes an understanding of FactoryBot. You can learn about Factor
 
 ### Getting started
 
-The entry point of this gem is `FactoryBot::Blueprint.plan`. You can pass a block to this method, in which you describe the plan for creating objects in DSL.
+The entry point of this gem is [`FactoryBot::Blueprint.plan`](https://rubydoc.info/gems/factory_bot-blueprint/FactoryBot/Blueprint#plan-class_method). You can pass a block to this method, in which you describe the plan for creating objects in DSL.
 
 ```ruby
 bp = FactoryBot::Blueprint.plan { user(name: "John") }
@@ -41,7 +41,7 @@ FactoryBot.define do
 end
 ```
 
-The result of `FactoryBot::Blueprint.plan` is called a **blueprint**. Blueprints represent a plan for creating a set of objects, which can be passed to `FactoryBot::Blueprint.create` or `FactoryBot::Blueprint.build` to create the actual set of objects. (these methods are corresponding to `FactoryBot.build` and `FactoryBot.create` respectively). Method call arguments (ex. `name: "John"`) are passed to the FactoryBot's `build` or `create` method.
+The result of `FactoryBot::Blueprint.plan` is called a **blueprint**. Blueprints represent a plan for creating a set of objects, which can be passed to [`FactoryBot::Blueprint.create`](https://rubydoc.info/gems/factory_bot-blueprint/FactoryBot/Blueprint#create-class_method) or [`FactoryBot::Blueprint.build`](https://rubydoc.info/gems/factory_bot-blueprint/FactoryBot/Blueprint#build-class_method) to create the actual set of objects. (these methods are corresponding to `FactoryBot.build` and `FactoryBot.create` respectively). Method call arguments (ex. `name: "John"`) are passed to the FactoryBot's `build` or `create` method.
 
 ```ruby
 result, objects = FactoryBot::Blueprint.build(bp) # or FactoryBot::Blueprint.create
@@ -77,7 +77,7 @@ As you can see, the creation result is a `Hash`, and unnamed objects are given r
 
 ### The Blueprint DSL
 
-This section will go through the primary features of the Blueprint DSL.
+This section will go through the primary features of the Blueprint DSL. All DSL APIs can be found in the [`factrey` API Doc](https://rubydoc.info/gems/factrey/Factrey/DSL).
 
 #### Objects, references, and tree structures
 
@@ -258,7 +258,7 @@ letbp(:blog, %i[article comment]) do
 end
 ```
 
-`letbp` can be broken down into separate helper methods: `let_blueprint` and `let_blueprint_build` (or `let_blueprint_create`). For more details, see [API documentation](https://rubydoc.info/gems/factory_bot-blueprint-rspec/FactoryBot/Blueprint/RSpec/Driver).
+`letbp` can be broken down into separate helper methods: `let_blueprint` and `let_blueprint_build` (or `let_blueprint_create`). For more details, see [`factory_bot-blueprint-rspec` API Doc](https://rubydoc.info/gems/factory_bot-blueprint-rspec/FactoryBot/Blueprint/RSpec/Driver).
 
 `letbp` also accepts the options `inherit` and `strategy`:
 
