@@ -3,6 +3,12 @@
 RSpec.describe Factrey::Blueprint::Node do
   let(:node) { described_class.new(:foo, Factrey::Blueprint::Type.new(:user) { nil }) }
 
+  describe "#to_ref" do
+    subject { node.to_ref }
+
+    it { is_expected.to eq Factrey::Ref.new(:foo) }
+  end
+
   describe "#root?" do
     subject { node.root? }
 

@@ -89,6 +89,8 @@ module Factrey
     #
     # This method is usually not called directly. Use the shorthand method defined by {.add_type} instead.
     # @param type [Blueprint::Type]
+    # @yieldparam ref [Ref]
+    # @return [Ref]
     def node(type, ...)
       name = @let_scope ? (@let_scope.name || type.name) : nil
       @let_scope = nil # consumed
@@ -98,6 +100,8 @@ module Factrey
     end
 
     # Enter the node to configure arguments and child nodes.
+    # @yieldparam ref [Ref]
+    # @return [Ref]
     # @example
     #   Factrey.blueprint do
     #     let.blog do
@@ -119,9 +123,9 @@ module Factrey
       stashed_ancestors = @ancestors
       @ancestors = node.ancestors + [node]
       args(*args, **kwargs)
-      yield if block_given?
+      yield node.to_ref if block_given?
       @ancestors = stashed_ancestors
-      node
+      node.to_ref
     end
 
     # Add arguments to the current node.

@@ -112,6 +112,25 @@ RSpec.describe Factrey::DSL do
           ]
         end
       end
+
+      context "with block arguments and return values" do
+        subject do
+          blueprint do
+            user(1) do |user1|
+              user2 = user(2, user: user1)
+              user(3, user: user2)
+            end
+          end
+        end
+
+        it "adds nodes and nodes ancestors reflects structures" do
+          expect(subject.nodes.values.to_a).to match [
+            have_attributes(args: [1], kwargs: {}),
+            have_attributes(args: [2], kwargs: { user: subject.nodes.values[0].to_ref }),
+            have_attributes(args: [3], kwargs: { user: subject.nodes.values[1].to_ref }),
+          ]
+        end
+      end
     end
 
     describe "#ext" do

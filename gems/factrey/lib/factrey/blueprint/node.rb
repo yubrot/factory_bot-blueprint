@@ -35,6 +35,9 @@ module Factrey
         @kwargs = kwargs
       end
 
+      # @return [Ref]
+      def to_ref = Ref.new(name)
+
       # @return [Boolean]
       def root? = ancestors.empty?
 
