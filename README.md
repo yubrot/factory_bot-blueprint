@@ -44,21 +44,28 @@ end
 The result of `FactoryBot::Blueprint.plan` is called a **blueprint**. Blueprints represent a plan for creating a set of objects, which can be passed to `FactoryBot::Blueprint.create` or `FactoryBot::Blueprint.build` to create the actual set of objects. (these methods are corresponding to `FactoryBot.build` and `FactoryBot.create` respectively). Method call arguments (ex. `name: "John"`) are passed to the FactoryBot's `build` or `create` method.
 
 ```ruby
-FactoryBot::Blueprint.build(bp) # or FactoryBot::Blueprint.create
-#=>
-#{:_anon_9ea309fe2cd1 => #<User name="John">}
+result, objects = FactoryBot::Blueprint.build(bp) # or FactoryBot::Blueprint.create
+
+objects
+#=> {:_anon_9ea309fe2cd1 => #<User name="John">}
+
+# Notice that the result holds the DSL code block result
+result
+#=> #<User name="John">
 ```
 
 The DSL, described in detail below, supports declaring and naming multiple objects.
 
 ```ruby
 # FactoryBot::Blueprint.build can also take a DSL code block directly
-FactoryBot::Blueprint.build do
+_, objects = FactoryBot::Blueprint.build do
   let(:kevin).user(name: "Kevin")
   user(name: "User 1")
   user(name: "User 2")
   user(name: "User 3")
 end
+
+objects
 #=>
 #{:kevin => #<User name="Kevin">,
 # :_anon_ee5f94e77718 => #<User name="User 1">,
@@ -97,14 +104,14 @@ FactoryBot.create(:article, title: "Article 3", blog:)
 This can be rewritten in FactoryBot::Blueprint as follows:
 
 ```ruby
-instance = FactoryBot::Blueprint.create do
+_, objects = FactoryBot::Blueprint.create do
   let(:author).author(name: "John")
   let(:blog).blog(name: "John's Blog", author: ref.author)
   article(title: "Article 1", blog: ref.blog)
   article(title: "Article 2", blog: ref.blog)
   article(title: "Article 3", blog: ref.blog)
 end
-instance => { author:, blog: }
+objects => { author:, blog: }
 ```
 
 It's not that interesting, but
@@ -117,14 +124,14 @@ From here, several simplifications can be made.
 First, `let(name)` can omit `name` if it is the same name as the type:
 
 ```ruby
-instance = FactoryBot::Blueprint.create do
+_, objects = FactoryBot::Blueprint.create do
   let.author(name: "John")
   let.blog(name: "John's Blog", author: ref.author)
   article(title: "Article 1", blog: ref.blog)
   article(title: "Article 2", blog: ref.blog)
   article(title: "Article 3", blog: ref.blog)
 end
-instance => { author:, blog: }
+objects => { author:, blog: }
 ```
 
 Next, **object declarations can take a block**. Within the block, objects can be declared in the same way, but if a proper association can be made here from the object in the block to the parent object [^1], **this gem will automatically add references to them**:
@@ -132,7 +139,7 @@ Next, **object declarations can take a block**. Within the block, objects can be
 [^1]: or some proper ancestor object
 
 ```ruby
-instance = FactoryBot::Blueprint.create do
+_, objects = FactoryBot::Blueprint.create do
   let.author(name: "John") do
     let.blog(name: "John's Blog") do  # adds { author: ref.author }
       article(title: "Article 1")     # adds { blog: ref.blog }
@@ -141,7 +148,7 @@ instance = FactoryBot::Blueprint.create do
     end
   end
 end
-instance => { author:, blog: }
+objects => { author:, blog: }
 ```
 
 This auto-reference will work automatically for any association of any traits in the FactoryBot's factory definition. [^2] [^3]
@@ -156,7 +163,9 @@ This auto-reference will work automatically for any association of any traits in
 ```ruby
 bp = FactoryBot::Blueprint.plan { user(name: "User 1") }
 FactoryBot::Blueprint.plan(bp) { user(name: "User 2") }
-FactoryBot::Bluepirnt.build(bp)
+_, objects = FactoryBot::Bluepirnt.build(bp)
+
+objects
 #=>
 #{:_anon_e1f15f805023 => #<User name="User 1">,
 # :_anon_b26e69c8d36b => #<User name="User 2">}
@@ -174,11 +183,13 @@ bp = FactoryBot::Blueprint.plan do
   end
 end
 
-FactoryBot::Blueprint.build(bp) do
+_, objects = FactoryBot::Blueprint.build(bp) do
   on.blog(category: "Daily log") do  # adds an argument (category: "Daily log")
     article(title: "New article")    # adds an article
   end
 end
+
+objects
 #=>
 #{:user => #<User name="John">,
 # :blog => #<Blog title="John's Blog", category="Daily log", user=...>,
@@ -217,8 +228,8 @@ When trying to use FactoryBot::Blueprint on RSpec, the following patterns are fr
 # 1. define a blueprint
 let(:blog_blueprint) do
   FactoryBot::Blueprint.plan(ext: self) do
-    let.blog(title: "Daily log") do
-      let.article(title: "Article 1")
+    blog(title: "Daily log") do
+      let.article(title: "Article 1") { let.comment(text: "foo") }
       article(title: "Article 2")
       article(title: "Article 3")
     end
@@ -228,17 +239,19 @@ end
 # 2. build (or create) it
 let(:blog_blueprint_instance) { FactoryBot::Blueprint.build(blog_blueprint) }
 
-# 3. define each named object using let
-let(:blog) { blog_blueprint_instance[:blog] }
-let(:article) { blog_blueprint_instance[:article] }
+# 3. define the result and each named object using let
+let(:blog) { blog_blueprint_instance[0] }
+let(:article) { blog_blueprint_instance[1][:article] }
+let(:comment) { blog_blueprint_instance[1][:comment] }
 ```
 
 `factory_bot-blueprint-rspec` gem provides an all-in-one helper method `letbp` to do this.
 
 ```ruby
-letbp(%i[blog article]) do
-  let.blog(title: "Daily log") do
-    let.article(title: "Article 1")
+# Define a blog, an article, and a comment from the instance of the blueprint described in the block
+letbp(:blog, %i[article comment]) do
+  blog(title: "Daily log") do
+    let.article(title: "Article 1") { let.comment(text: "foo") }
     article(title: "Article 2")
     article(title: "Article 3")
   end
@@ -247,24 +260,11 @@ end
 
 `letbp` can be broken down into separate helper methods: `let_blueprint` and `let_blueprint_build` (or `let_blueprint_create`). For more details, see [API documentation](https://rubydoc.info/gems/factory_bot-blueprint-rspec/FactoryBot/Blueprint/RSpec/Driver).
 
-If you need to refer to only one object in the root, you can omit the `let` and write:
-
-```ruby
-# Blog with three articles
-letbp(:blog) do
-  blog(title: "Daily log") do
-    article(title: "Article 1")
-    article(title: "Article 2")
-    article(title: "Article 3")
-  end
-end
-```
-
 `letbp` also accepts the options `inherit` and `strategy`:
 
 ```ruby
 RSpec.describe "something" do
-  letbp(:blog, strategy: :build) do   # By default letbp uses :create strategy, this overwrites it
+  letbp(:blog, strategy: :build) do   # By default letbp uses :create strategy, :strategy option overwrites it
     blog(title: "Daily log") do
       let.article(title: "Article 1")
       article(title: "Article 2")
@@ -273,7 +273,7 @@ RSpec.describe "something" do
   end
 
   context "with some comments on the article 1" do
-    letbp(:blog, inherit: true) do    # Extends super() blueprint by specifying inherit: true
+    letbp(:blog, inherit: true) do    # Extends super() blueprint by set :inherit option to true
       on.article do
         comment(text: "Comment 1")
         comment(text: "Comment 2")
