@@ -27,6 +27,7 @@ module FactoryBot
         #   end
         def let_blueprint(name, inherit: false, &)
           let(name) { ::FactoryBot::Blueprint.plan(inherit ? super() : nil, ext: self, &) }
+          name
         end
 
         # Build objects by <code>build</code> strategy in FactoryBot from a blueprint and declare them using RSpec's
@@ -73,7 +74,7 @@ module FactoryBot
         def let_blueprint_instantiate(strategy, **map)
           raise ArgumentError, "Unsupported strategy: #{strategy}" if strategy && !%i[create build].include?(strategy)
 
-          map.each do |source, definition|
+          map.map do |source, definition|
             raise TypeError, "source must be a Symbol" unless source.is_a?(Symbol)
 
             definition =
@@ -105,6 +106,8 @@ module FactoryBot
             let(result_name) { __send__(instance)[0] } if result_name
 
             item_names.each { |name| let(name) { __send__(instance)[1][name] } }
+
+            instance
           end
         end
 
@@ -149,6 +152,30 @@ module FactoryBot
 
           let_blueprint(source, inherit:, &)
           let_blueprint_instantiate strategy, source => { result: name, items: }
+        end
+
+        # <code>let!</code> version of {#let_blueprint}.
+        def let_blueprint!(...)
+          name = let_blueprint(...)
+          before { __send__(name) }
+        end
+
+        # <code>let!</code> version of {#let_blueprint_build}.
+        def let_blueprint_build!(...)
+          names = let_blueprint_build(...)
+          before { names.each { __send__(_1) } }
+        end
+
+        # <code>let!</code> version of {#let_blueprint_create}.
+        def let_blueprint_create!(...)
+          names = let_blueprint_create(...)
+          before { names.each { __send__(_1) } }
+        end
+
+        # <code>let!</code> version of {#letbp}.
+        def letbp!(...)
+          names = letbp(...)
+          before { names.each { __send__(_1) } }
         end
       end
     end

@@ -68,7 +68,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
   end
 
   describe "#let_blueprint_create" do
-    it "is variation of #let_blueprint_build"
+    it "is a variation of #let_blueprint_build"
   end
 
   describe "#letbp" do
@@ -102,6 +102,52 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
         expect(blog).to have_attributes(title: "User 2 Blog", user:)
         expect(article2).to have_attributes(title: "Article 3", blog:)
       end
+    end
+  end
+
+  describe "#let_blueprint!" do
+    let(:user_name) { { value: "John" } }
+
+    let_blueprint(:foo) { let.user(name: ext.user_name[:value]) }
+    let_blueprint!(:bar) { let.user(name: ext.user_name[:value]) }
+
+    it "is evaluated before tests" do
+      user_name[:value] = "Jane"
+
+      expect(foo.nodes[:user]).to have_attributes(kwargs: { name: "Jane" })
+      expect(bar.nodes[:user]).to have_attributes(kwargs: { name: "John" })
+    end
+  end
+
+  describe "#let_blueprint_build!" do
+    let_blueprint(:source) { let.user(name: "John") }
+
+    let_blueprint_build source: { result: :foo, instance: :instance_for_foo }
+    let_blueprint_build! source: { result: :bar, instance: :instance_for_bar }
+
+    it "is evaluated before tests" do
+      FactoryBot::Blueprint.plan(source) { on.user(name: "Jane") }
+
+      expect(foo).to have_attributes(name: "Jane")
+      expect(bar).to have_attributes(name: "John")
+    end
+  end
+
+  describe "#let_blueprint_create!" do
+    it "is a variation of #let_blueprint_build!"
+  end
+
+  describe "#letbp!" do
+    let(:user_name) { { value: "John" } }
+
+    letbp(:foo, strategy: :build) { user(name: ext.user_name[:value]) }
+    letbp!(:bar, strategy: :build) { user(name: ext.user_name[:value]) }
+
+    it "is evaluated before tests" do
+      user_name[:value] = "Jane"
+
+      expect(foo).to have_attributes(name: "Jane")
+      expect(bar).to have_attributes(name: "John")
     end
   end
 end
