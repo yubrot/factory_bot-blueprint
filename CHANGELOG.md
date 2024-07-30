@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [0.3.0] - 2024/07/30
+
+- Added `let!` version methods to RSpec helpers
+
 ## [0.2.0] - 2024/07/29
 
 - Added: Blocks passed to `DSL#node` takes a reference to the created node
