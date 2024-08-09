@@ -235,38 +235,6 @@ RSpec.describe Factrey::DSL do
       end
     end
 
-    describe "#let_default_name" do
-      context "without let" do
-        subject { blueprint { let_default_name(:foo).user } }
-
-        it "does nothing about name" do
-          expect(subject.nodes.values.to_a).to match [
-            have_attributes(name: start_with("_anon_")),
-          ]
-        end
-      end
-
-      context "with unnamed let" do
-        subject { blueprint { let { let_default_name(:foo).user } } }
-
-        it "applies the default name" do
-          expect(subject.nodes.values.to_a).to match [
-            have_attributes(name: :foo),
-          ]
-        end
-      end
-
-      context "with named let" do
-        subject { blueprint { let(:bar) { let_default_name(:foo).user } } }
-
-        it "does nothing about name" do
-          expect(subject.nodes.values.to_a).to match [
-            have_attributes(name: :bar),
-          ]
-        end
-      end
-    end
-
     describe "#on" do
       subject do
         blueprint do

@@ -11,7 +11,7 @@ module Factrey
   class DSL
     # Methods reserved for DSL.
     RESERVED_METHODS = %i[
-      ref ext let let_default_name node on type args
+      ref ext let node on type args
       __send__ __method__ __id__ nil? is_a? to_s inspect object_id class instance_eval instance_variables
       initialize block_given? enum_for raise
     ].to_set.freeze
@@ -55,35 +55,6 @@ module Factrey
       ret = yield
       @let_scope = nil
       ret
-    end
-
-    # Overrides the default name given by {#let}.
-    #
-    # This method does nothing if it is not preceded by {#let}.
-    # @param name [Symbol]
-    # @return [Let, Blueprint]
-    # @example
-    #   class Factrey::DSL do
-    #     # Define a shortcut method for user(:admin)
-    #     def admin_user(...) = let_default_name(:admin_user).user(:admin, ...)
-    #   end
-    #   Factrey.blueprint do
-    #     admin_user              # no meaningful name is given (See Blueprint::Node#anonymous?)
-    #     let.admin_user          # named as admin_user
-    #     let(:user2).admin_user  # named as user2
-    #   end
-    def let_default_name(name, &)
-      raise TypeError, "name must be a Symbol" unless name.is_a?(Symbol)
-
-      if @let_scope && @let_scope.name.nil?
-        @let_scope = nil # consumed
-
-        let(name, &)
-      else
-        return self unless block_given?
-
-        yield
-      end
     end
 
     # Add a node to the blueprint.

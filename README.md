@@ -121,7 +121,7 @@ It's not that interesting, but
 
 From here, several simplifications can be made.
 
-First, `let(name)` can omit `name` if it is the same name as the type:
+First, `let(name)` can omit `name` if it is the same name as the method:
 
 ```ruby
 _, objects = FactoryBot::Blueprint.create do

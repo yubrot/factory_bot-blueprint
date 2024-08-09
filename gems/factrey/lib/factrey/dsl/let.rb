@@ -16,7 +16,7 @@ module Factrey
       # @!visibility private
       def respond_to_missing?(_method_name, _) = true
 
-      def method_missing(method_name, ...) = @dsl.let(@name) { @dsl.__send__(method_name, ...) }
+      def method_missing(method_name, ...) = @dsl.let(@name || method_name) { @dsl.__send__(method_name, ...) }
     end
   end
 end
