@@ -37,7 +37,7 @@ module Factrey
       raise TypeError, "dsl must be a subclass of DSL" unless dsl <= DSL
 
       blueprint ||= Blueprint.new
-      blueprint.define_result dsl.new(blueprint:, ext:).instance_exec(&) if block_given?
+      blueprint.define_result dsl.new(blueprint:, ext:).instance_eval(&) if block_given?
       blueprint
     end
   end

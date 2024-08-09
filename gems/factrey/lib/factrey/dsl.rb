@@ -12,7 +12,8 @@ module Factrey
     # Methods reserved for DSL.
     RESERVED_METHODS = %i[
       ref ext let let_default_name node on type args
-      __send__ __id__ nil? object_id class instance_exec initialize block_given? raise
+      __send__ __method__ __id__ nil? is_a? to_s inspect object_id class instance_eval instance_variables
+      initialize block_given? enum_for raise
     ].to_set.freeze
 
     (instance_methods + private_instance_methods).each do |method|
