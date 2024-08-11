@@ -87,7 +87,7 @@ For example, with these factories:
 FactoryBot.define do
   factory(:author)
   factory(:blog) { author }
-  factory(:article) { blog }
+  factory(:blog_article) { blog }
 end
 ```
 
@@ -96,9 +96,9 @@ You can create an author, a blog, and three articles in plain FactoryBot like th
 ```ruby
 author = FactoryBot.create(:author, name: "John")
 blog = FactoryBot.create(:blog, name: "John's Blog", author:)
-FactoryBot.create(:article, title: "Article 1", blog:)
-FactoryBot.create(:article, title: "Article 2", blog:)
-FactoryBot.create(:article, title: "Article 3", blog:)
+FactoryBot.create(:blog_article, title: "Article 1", blog:)
+FactoryBot.create(:blog_article, title: "Article 2", blog:)
+FactoryBot.create(:blog_article, title: "Article 3", blog:)
 ```
 
 This can be rewritten in FactoryBot::Blueprint as follows:
@@ -107,9 +107,9 @@ This can be rewritten in FactoryBot::Blueprint as follows:
 _, objects = FactoryBot::Blueprint.create do
   let(:author).author(name: "John")
   let(:blog).blog(name: "John's Blog", author: ref.author)
-  article(title: "Article 1", blog: ref.blog)
-  article(title: "Article 2", blog: ref.blog)
-  article(title: "Article 3", blog: ref.blog)
+  blog_article(title: "Article 1", blog: ref.blog)
+  blog_article(title: "Article 2", blog: ref.blog)
+  blog_article(title: "Article 3", blog: ref.blog)
 end
 objects => { author:, blog: }
 ```
@@ -127,9 +127,9 @@ First, `let(name)` can omit `name` if it is the same name as the method:
 _, objects = FactoryBot::Blueprint.create do
   let.author(name: "John")
   let.blog(name: "John's Blog", author: ref.author)
-  article(title: "Article 1", blog: ref.blog)
-  article(title: "Article 2", blog: ref.blog)
-  article(title: "Article 3", blog: ref.blog)
+  blog_article(title: "Article 1", blog: ref.blog)
+  blog_article(title: "Article 2", blog: ref.blog)
+  blog_article(title: "Article 3", blog: ref.blog)
 end
 objects => { author:, blog: }
 ```
@@ -141,10 +141,10 @@ Next, **object declarations can take a block**. Within the block, objects can be
 ```ruby
 _, objects = FactoryBot::Blueprint.create do
   let.author(name: "John") do
-    let.blog(name: "John's Blog") do  # adds { author: ref.author }
-      article(title: "Article 1")     # adds { blog: ref.blog }
-      article(title: "Article 2")     # adds { blog: ref.blog }
-      article(title: "Article 3")     # adds { blog: ref.blog }
+    let.blog(name: "John's Blog") do    # adds { author: ref.author }
+      blog_article(title: "Article 1")  # adds { blog: ref.blog }
+      blog_article(title: "Article 2")  # adds { blog: ref.blog }
+      blog_article(title: "Article 3")  # adds { blog: ref.blog }
     end
   end
 end
@@ -155,6 +155,21 @@ This auto-reference will work automatically for any association of any traits in
 
 [^2]: Except [inline associations](https://thoughtbot.github.io/factory_bot/associations/inline-definition.html). It seems that it is difficult to support this
 [^3]: See [blueprint_spec.rb](./gems/factory_bot-blueprint/spec/factory_bot/blueprint_spec.rb) (together with [factories.rb](./gems/factory_bot-blueprint/spec/factories.rb)) for detailed behavior
+
+Finally, wen can omit part of the object name based on the ancestor objects.
+
+```ruby
+_, objects = FactoryBot::Blueprint.create do
+  let.author(name: "John") do
+    let.blog(name: "John's Blog") do
+      article(title: "Article 1")  # We have a `blog` in the ancestors, so we can omit `blog_`
+      article(title: "Article 2")
+      article(title: "Article 3")
+    end
+  end
+end
+objects => { author:, blog: }
+```
 
 #### Extending the existing blueprints
 
@@ -193,9 +208,9 @@ objects
 #=>
 #{:user => #<User name="John">,
 # :blog => #<Blog title="John's Blog", category="Daily log", user=...>,
-# :_anon_c7f35f49d1ee => #<Article title="Article 1", blog=...>,
-# :_anon_463ea3ea9103 => #<Article title="Article 2", blog=...>,
-# :_anon_ea42e6980975 => #<Article title="New article", blog=...>}
+# :_anon_c7f35f49d1ee => #<BlogArticle title="Article 1", blog=...>,
+# :_anon_463ea3ea9103 => #<BlogArticle title="Article 2", blog=...>,
+# :_anon_ea42e6980975 => #<BlogArticle title="New article", blog=...>}
 ```
 
 #### External references

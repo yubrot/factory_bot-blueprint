@@ -105,17 +105,35 @@ RSpec.describe FactoryBot::Blueprint do
     context "with FactoryBot parents and same type associations" do
       subject do
         build do
-          let.rgb(code: "red") { let(:rgb_grad).gradient }
-          let.rgba(code: "blue") { let(:rgba_grad).gradient }
+          let.color(code: "red") { let(:color_grad).gradient }
+          let.white { let(:white_grad).gradient }
         end
       end
 
       it "is considered to be compatible with the base type and the first association takes precedence" do
         expect(subject[1]).to include(
-          rgb: Test::RGB.new(code: "red"),
-          rgb_grad: Test::Gradient.new(from: subject[1][:rgb], to: Test::RGB.new),
-          rgba: Test::RGBA.new(code: "blue"),
-          rgba_grad: Test::Gradient.new(from: subject[1][:rgba], to: Test::RGB.new),
+          color: Test::Color.new(code: "red"),
+          color_grad: Test::Gradient.new(from: subject[1][:color], to: Test::Color.new),
+          white: Test::Color.new(code: "white"),
+          white_grad: Test::Gradient.new(from: subject[1][:white], to: Test::Color.new),
+        )
+      end
+    end
+
+    context "with FactoryBot parents and autocompletion" do
+      subject do
+        build do
+          let.customer(id: 1) { let.profile(name: "John") }
+          let.premium_customer(id: 2) { let(:premium_customer_profile).profile(name: "Doe") }
+        end
+      end
+
+      it "autocompletes the type names from ancestors" do
+        expect(subject[1]).to include(
+          customer: Test::Customer.new(id: 1),
+          profile: Test::CustomerProfile.new(customer: subject[1][:customer], name: "John"),
+          premium_customer: Test::Customer.new(id: 2, plan: "premium"),
+          premium_customer_profile: Test::CustomerProfile.new(customer: subject[1][:premium_customer], name: "Doe"),
         )
       end
     end
@@ -179,7 +197,7 @@ RSpec.describe FactoryBot::Blueprint do
       end
 
       it "resolves inline associations" do
-        pending "inline associations are unsupported for now"
+        skip "inline associations are unsupported for now"
         expect(subject[1]).to include(
           cp: have_attributes(school: subject[1][:school], student: subject[1][:c]),
           # NOTE: Even if we could handle inline associations correctly,

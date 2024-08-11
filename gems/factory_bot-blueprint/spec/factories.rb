@@ -16,17 +16,28 @@ module Test
   end
 
   # TESTING parent
-  RGB = Struct.new(:code)
-  RGBA = Struct.new(:code, :opacity)
+  Color = Struct.new(:code)
   Gradient = Struct.new(:from, :to)
 
   FactoryBot.define do
-    factory(:rgb, class: "Test::RGB")
-    factory(:rgba, class: "Test::RGBA", parent: :rgb)
-    factory(:gradient, class: "Test::Gradient") do
-      from factory: :rgb
-      to factory: :rgb # TESTING same type
+    factory(:color, class: "Test::Color") do
+      factory(:white) { code { "white" } }
     end
+    factory(:gradient, class: "Test::Gradient") do
+      from factory: :color
+      to factory: :color # TESTING same type
+    end
+  end
+
+  # TESTING auto_complete
+  Customer = Struct.new(:id, :plan)
+  CustomerProfile = Struct.new(:name, :customer)
+
+  FactoryBot.define do
+    factory(:customer, class: "Test::Customer") do
+      factory(:premium_customer) { plan { "premium" } }
+    end
+    factory(:customer_profile, class: "Test::CustomerProfile") { customer }
   end
 
   # TESTING traits

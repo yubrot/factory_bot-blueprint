@@ -10,16 +10,38 @@ module FactoryBot
       # We would like to minimize these dependencies as much as possible.
 
       # @!visibility private
-      def respond_to_missing?(type_name, _)
-        FactoryBot.factories.registered? type_name
+      def respond_to_missing?(name, _)
+        _autocompleted_method_names(name).any? do |method_name|
+          self.class.method_defined?(method_name) || FactoryBot.factories.registered?(method_name)
+        end
       end
 
-      def method_missing(type_name, ...)
-        raise NoMethodError, "Unknown type #{type_name}" unless FactoryBot.factories.registered? type_name
+      def method_missing(name, ...)
+        _autocompleted_method_names(name).each do |method_name|
+          if self.class.method_defined?(method_name)
+            return __send__(method_name, ...)
+          elsif FactoryBot.factories.registered?(method_name)
+            factory = FactoryBot.factories.find(method_name)
+            self.class.add_type(self.class.type_from_factory_bot_factory(method_name, factory))
+            return __send__(method_name, ...)
+          end
+        end
 
-        factory = FactoryBot.factories.find(type_name)
-        self.class.add_type(self.class.type_from_factory_bot_factory(type_name, factory))
-        __send__(type_name, ...)
+        raise NoMethodError,
+              "Undefined method `#{name}' for #{self} and cannot be resolved from FactoryBot factories"
+      end
+
+      private
+
+      def _autocompleted_method_names(name)
+        return enum_for(__method__, name) unless block_given?
+
+        @ancestors.reverse_each do |ancestor|
+          ancestor.type.compatible_types.each do |ancestor_type|
+            yield :"#{ancestor_type}_#{name}"
+          end
+        end
+        yield name
       end
 
       class << self
