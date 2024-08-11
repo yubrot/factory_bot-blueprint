@@ -2,6 +2,7 @@
 
 require_relative "factrey/version"
 require_relative "factrey/ref"
+require_relative "factrey/proxy"
 require_relative "factrey/blueprint"
 require_relative "factrey/dsl"
 
