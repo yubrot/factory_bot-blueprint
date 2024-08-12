@@ -61,14 +61,20 @@ RSpec.describe Factrey::DSL do
       subject { blueprint { 123 } }
 
       it "defines the result" do
-        expect(subject.result).to eq 123
+        expect(subject.nodes[:_result_]).to have_attributes(
+          type: Factrey::Blueprint::Type::COMPUTED,
+          args: [123],
+        )
       end
 
       context "when the blueprint is extended" do
         subject { blueprint(blueprint { 123 }) { 456 } }
 
         it "does not overwrite the result" do
-          expect(subject.result).to eq 123
+          expect(subject.nodes[:_result_]).to have_attributes(
+            type: Factrey::Blueprint::Type::COMPUTED,
+            args: [123],
+          )
         end
       end
     end
@@ -77,7 +83,7 @@ RSpec.describe Factrey::DSL do
       # We use #node through helper methods defined by .add_type
       subject { blueprint { user } }
 
-      it "adds a node" do
+      it "adds a node and returns the reference to the node" do
         expect(subject.nodes.values.to_a).to match [
           have_attributes(
             name: start_with("_anon_"),
@@ -86,6 +92,7 @@ RSpec.describe Factrey::DSL do
             args: [],
             kwargs: {},
           ),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
         ]
       end
 
@@ -103,6 +110,7 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [123]),
             have_attributes(kwargs: { foo: 456 }),
             have_attributes(args: [], kwargs: {}),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[2].name)]),
           ]
         end
       end
@@ -125,6 +133,7 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [2], ancestors: [0].map { subject.nodes.values[_1] }),
             have_attributes(args: [3], ancestors: [0, 1].map { subject.nodes.values[_1] }),
             have_attributes(args: [4], ancestors: [0, 1].map { subject.nodes.values[_1] }),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
           ]
         end
       end
@@ -144,6 +153,7 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [1], kwargs: {}),
             have_attributes(args: [2], kwargs: { user: subject.nodes.values[0].to_ref }),
             have_attributes(args: [3], kwargs: { user: subject.nodes.values[1].to_ref }),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
           ]
         end
       end
@@ -157,6 +167,7 @@ RSpec.describe Factrey::DSL do
       it "returns an object set at Factrey.blueprint" do
         expect(subject.nodes.values.to_a).to match [
           have_attributes(kwargs: { name: "FOO" }),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
         ]
       end
     end
@@ -175,6 +186,7 @@ RSpec.describe Factrey::DSL do
           have_attributes(name: start_with("_anon_")),
           have_attributes(name: :user),
           have_attributes(name: :author),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[2].name)]),
         ]
       end
 
@@ -203,6 +215,7 @@ RSpec.describe Factrey::DSL do
         it "does not affect other declarations" do
           expect(subject.nodes.values.to_a).to match [
             have_attributes(name: start_with("_anon_")),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
           ]
         end
       end
@@ -222,6 +235,7 @@ RSpec.describe Factrey::DSL do
           expect(subject.nodes.values.to_a).to match [
             have_attributes(name: :foo),
             have_attributes(name: start_with("_anon_")),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[1].name)]),
           ]
         end
       end
@@ -245,7 +259,7 @@ RSpec.describe Factrey::DSL do
         end
       end
 
-      it "alters the node resolved by name" do
+      it "alters the node resolved by name and returns the reference to the node" do
         expect(subject.nodes.values.to_a).to match [
           have_attributes(
             name: :user,
@@ -256,6 +270,7 @@ RSpec.describe Factrey::DSL do
             name: :user2,
             ancestors: [subject.nodes[:user]],
           ),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
         ]
       end
 
@@ -278,6 +293,7 @@ RSpec.describe Factrey::DSL do
             have_attributes(name: :user3, ancestors: [subject.nodes[:user2]]),
             have_attributes(name: :user4, ancestors: [subject.nodes[:user]]),
             have_attributes(name: :user5, ancestors: [subject.nodes[:user2]]),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[1].name)]),
           ]
         end
       end
@@ -307,7 +323,16 @@ RSpec.describe Factrey::DSL do
             args: %i[foo bar baz],
             kwargs: { key: "value" },
           ),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
         ]
+      end
+
+      context "when #args is used without a node declaration" do
+        subject { blueprint { args :foo } }
+
+        it "fails with an error" do
+          expect { subject }.to raise_error NameError
+        end
       end
     end
   end

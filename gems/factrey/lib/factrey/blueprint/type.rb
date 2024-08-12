@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "set"
+
 module Factrey
   class Blueprint
     # A type representation on Factrey blueprints.
@@ -40,6 +42,9 @@ module Factrey
         @auto_references = auto_references.freeze
         @factory = factory
       end
+
+      # A special type that represents values computed from other objects.
+      COMPUTED = Type.new(:_computed) { |_, _, arg| arg }
     end
   end
 end

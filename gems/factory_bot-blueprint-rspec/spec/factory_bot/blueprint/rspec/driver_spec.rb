@@ -59,7 +59,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
       let_blueprint_build(source: { result: :built, items: %i[blog article], instance: :instance })
 
       it "declares objects" do
-        expect(instance[1]).to include(blog:, article:)
+        expect(instance).to include(blog:, article:)
         expect(built).to have_attributes(name: "User 2")
         expect(blog).to have_attributes(title: "User 2 Blog", user: built)
         expect(article).to have_attributes(title: "Article 1", blog:)
@@ -84,7 +84,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
 
     it "delcares a blueprint and objects" do
       expect(user_blueprint).to be_a Factrey::Blueprint
-      expect(user_blueprint_instance[1]).to include(blog:, article:)
+      expect(user_blueprint_instance).to include(blog:, article:)
       expect(user).to have_attributes(name: "User 2")
       expect(blog).to have_attributes(title: "User 2 Blog", user:)
       expect(article).to have_attributes(title: "Article 1", blog:)
@@ -98,7 +98,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
       end
 
       it "extends a blueprint and declares objects" do
-        expect(user_blueprint_instance[1]).to include(blog:, article:, article2:)
+        expect(user_blueprint_instance).to include(blog:, article:, article2:)
         expect(blog).to have_attributes(title: "User 2 Blog", user:)
         expect(article2).to have_attributes(title: "Article 3", blog:)
       end

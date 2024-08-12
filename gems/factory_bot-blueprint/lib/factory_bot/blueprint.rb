@@ -41,7 +41,7 @@ module FactoryBot
       #     end
       #
       #   # Create a set of objects in FactoryBot (with `build` strategy) from the blueprint:
-      #   result, objects = FactoryBot::Blueprint.build(bp)
+      #   objects = FactoryBot::Blueprint.build(bp)
       #
       #   # This behaves as:
       #   objects = {}
@@ -51,23 +51,23 @@ module FactoryBot
       #   objects[gen_random_sym] = article3 = FactoryBot.build(:article, title: "Article 3", blog:)
       #   objects[gen_random_sym] = FactoryBot.build(:comment, name: "John", article: article3)
       #   objects[gen_random_sym] = FactoryBot.build(:comment, name: "Doe", article: article3)
-      #   result = blog
+      #   objects[:_result_] = blog
       def plan(blueprint = nil, ext: nil, &) = Factrey.blueprint(blueprint, ext:, dsl: DSL, &)
 
-      # Create a set of objects and compute the result by <code>build</code> strategy in FactoryBot.
+      # Create a set of objects by <code>build</code> strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
       # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
       # @yield Write Blueprint DSL code here
-      # @return [(Object, {Symbol => Object})] the result and the created objects
+      # @return [Hash{Symbol => Object}] the created objects
       def build(blueprint = nil, ext: nil, &) = instantiate(:build, blueprint, ext:, &)
 
-      # Create a set of objects and compute the result by <code>create</code> strategy in FactoryBot.
+      # Create a set of objects by <code>create</code> strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
       # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
       # @yield Write Blueprint DSL code here
-      # @return [(Object, {Symbol => Object})] the result and the created objects
+      # @return [Hash{Symbol => Object}] the created objects
       def create(blueprint = nil, ext: nil, &) = instantiate(:create, blueprint, ext:, &)
 
       # @!visibility private

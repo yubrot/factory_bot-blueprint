@@ -23,11 +23,6 @@ module Factrey
         @objects
       end
 
-      def instantiate_result
-        instantiate_objects # To keep consistency in the order of instantiation
-        resolver.resolve(@blueprint.result)
-      end
-
       private
 
       # @param node [Node]

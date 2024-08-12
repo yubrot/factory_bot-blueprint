@@ -5,9 +5,11 @@ RSpec.describe Factrey::Blueprint do
   let(:ty_b) { Factrey::Blueprint::Type.new(:ty_b) { nil } }
   let(:blueprint) do
     blueprint = described_class.new
-    blueprint.add_node(:foo, ty_a)
-    bar = blueprint.add_node(:bar, ty_a)
-    blueprint.add_node(:baz, ty_b, ancestors: [bar], args: [1, 2], kwargs: { hello: "world" })
+    blueprint.add_node(Factrey::Blueprint::Node.new(:foo, ty_a))
+    bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, ty_a))
+    blueprint.add_node(
+      Factrey::Blueprint::Node.new(:baz, ty_b, ancestors: [bar], args: [1, 2], kwargs: { hello: "world" }),
+    )
     blueprint
   end
 
@@ -46,11 +48,7 @@ RSpec.describe Factrey::Blueprint do
     end
   end
 
-  describe "#add_node" do # rubocop:disable RSpec/RepeatedExampleGroupBody
-    it "is covered by the Factrey::DSL spec"
-  end
-
-  describe "#define_result" do # rubocop:disable RSpec/RepeatedExampleGroupBody
+  describe "#add_node" do
     it "is covered by the Factrey::DSL spec"
   end
 

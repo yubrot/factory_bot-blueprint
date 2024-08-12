@@ -56,9 +56,9 @@ module FactoryBot
         #     let_blueprint_build blog_bp: { result: :blog, items: %i[article], instance: :blog_instance }
         #
         #     # Above example will be expanded to:
-        #     let(:blog_instance) { ::FactoryBot::Blueprint.build(blog_bp) }  # the instance object
-        #     let(:blog) { blog_instance[0] }                                 # the result object
-        #     let(:article) { blog_instance[1][:article] }                    # the item objects
+        #     let(:blog_instance) { ::FactoryBot::Blueprint.build(blog_bp) }       # the instance object
+        #     let(:blog) { blog_instance[Factrey::Blueprint::Node::RESULT_NAME] }  # the result object
+        #     let(:article) { blog_instance[:article] }                            # the item objects
         #   end
         def let_blueprint_build(**map) = let_blueprint_instantiate(:build, **map)
 
@@ -103,9 +103,9 @@ module FactoryBot
               let(instance) { ::FactoryBot::Blueprint.instantiate(strategy, __send__(source)) }
             end
 
-            let(result_name) { __send__(instance)[0] } if result_name
+            let(result_name) { __send__(instance)[::Factrey::Blueprint::Node::RESULT_NAME] } if result_name
 
-            item_names.each { |name| let(name) { __send__(instance)[1][name] } }
+            item_names.each { |name| let(name) { __send__(instance)[name] } }
 
             instance
           end

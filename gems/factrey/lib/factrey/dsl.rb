@@ -67,7 +67,7 @@ module Factrey
       name = @let_scope ? (@let_scope.name || type.name) : nil
       @let_scope = nil # consumed
 
-      node = @blueprint.add_node(name, type, ancestors: @ancestors)
+      node = @blueprint.add_node(Blueprint::Node.new(name, type, ancestors: @ancestors))
       on(node.name, ...)
     end
 

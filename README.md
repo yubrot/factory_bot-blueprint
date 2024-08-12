@@ -44,33 +44,29 @@ end
 The result of `FactoryBot::Blueprint.plan` is called a **blueprint**. Blueprints represent a plan for creating a set of objects, which can be passed to [`FactoryBot::Blueprint.create`](https://rubydoc.info/gems/factory_bot-blueprint/FactoryBot/Blueprint#create-class_method) or [`FactoryBot::Blueprint.build`](https://rubydoc.info/gems/factory_bot-blueprint/FactoryBot/Blueprint#build-class_method) to create the actual set of objects. (these methods are corresponding to `FactoryBot.build` and `FactoryBot.create` respectively). Method call arguments (ex. `name: "John"`) are passed to the FactoryBot's `build` or `create` method.
 
 ```ruby
-result, objects = FactoryBot::Blueprint.build(bp) # or FactoryBot::Blueprint.create
-
-objects
-#=> {:_anon_9ea309fe2cd1 => #<User name="John">}
-
-# Notice that the result holds the DSL code block result
-result
-#=> #<User name="John">
+FactoryBot::Blueprint.build(bp) # or FactoryBot::Blueprint.create
+#=>
+#{:_anon_9ea309fe2cd1 => #<User name="John">,
+# :_result_ => #<User name="John">}
+# Notice that the :_result_ (Factrey::Blueprint::Node::RESULT_NAME) holds the DSL code block result
 ```
 
 The DSL, described in detail below, supports declaring and naming multiple objects.
 
 ```ruby
 # FactoryBot::Blueprint.build can also take a DSL code block directly
-_, objects = FactoryBot::Blueprint.build do
+FactoryBot::Blueprint.build do
   let(:kevin).user(name: "Kevin")
   user(name: "User 1")
   user(name: "User 2")
   user(name: "User 3")
 end
-
-objects
 #=>
 #{:kevin => #<User name="Kevin">,
 # :_anon_ee5f94e77718 => #<User name="User 1">,
 # :_anon_2a70dd71bdac => #<User name="User 2">,
-# :_anon_d3461b354de6 => #<User name="User 3">}
+# :_anon_d3461b354de6 => #<User name="User 3">,
+# :_result_ => #<User name="User 3">}
 ```
 
 As you can see, the creation result is a `Hash`, and unnamed objects are given random names.
@@ -104,7 +100,7 @@ FactoryBot.create(:blog_article, title: "Article 3", blog:)
 This can be rewritten in FactoryBot::Blueprint as follows:
 
 ```ruby
-_, objects = FactoryBot::Blueprint.create do
+objects = FactoryBot::Blueprint.create do
   let(:author).author(name: "John")
   let(:blog).blog(name: "John's Blog", author: ref.author)
   blog_article(title: "Article 1", blog: ref.blog)
@@ -124,7 +120,7 @@ From here, several simplifications can be made.
 First, `let(name)` can omit `name` if it is the same name as the method:
 
 ```ruby
-_, objects = FactoryBot::Blueprint.create do
+objects = FactoryBot::Blueprint.create do
   let.author(name: "John")
   let.blog(name: "John's Blog", author: ref.author)
   blog_article(title: "Article 1", blog: ref.blog)
@@ -139,7 +135,7 @@ Next, **object declarations can take a block**. Within the block, objects can be
 [^1]: or some proper ancestor object
 
 ```ruby
-_, objects = FactoryBot::Blueprint.create do
+objects = FactoryBot::Blueprint.create do
   let.author(name: "John") do
     let.blog(name: "John's Blog") do    # adds { author: ref.author }
       blog_article(title: "Article 1")  # adds { blog: ref.blog }
@@ -159,7 +155,7 @@ This auto-reference will work automatically for any association of any traits in
 Finally, wen can omit part of the object name based on the ancestor objects.
 
 ```ruby
-_, objects = FactoryBot::Blueprint.create do
+objects = FactoryBot::Blueprint.create do
   let.author(name: "John") do
     let.blog(name: "John's Blog") do
       article(title: "Article 1")  # We have a `blog` in the ancestors, so we can omit `blog_`
@@ -176,14 +172,14 @@ objects => { author:, blog: }
 `FactoryBot::Blueprint.plan` (and `.build` and `.create`) optionally takes a blueprint as an argument. In this case, instead of creating a new blueprint, **the passed blueprint is extended**.
 
 ```ruby
-bp = FactoryBot::Blueprint.plan { user(name: "User 1") }
-FactoryBot::Blueprint.plan(bp) { user(name: "User 2") }
-_, objects = FactoryBot::Bluepirnt.build(bp)
-
-objects
+bp = FactoryBot::Blueprint.plan { user(name: "Some User") }
+FactoryBot::Blueprint.plan(bp) { user(name: "More User") }
+FactoryBot::Bluepirnt.build(bp)
 #=>
-#{:_anon_e1f15f805023 => #<User name="User 1">,
-# :_anon_b26e69c8d36b => #<User name="User 2">}
+#{:_anon_e1f15f805023 => #<User name="Some User">,
+# :_anon_b26e69c8d36b => #<User name="More User">,
+# :_result_ => #<User name="Some User">}
+# the :_result_ is not overwritten by extending the blueprint
 ```
 
 It is also possible to add arguments and child objects to the existing object declaration in the blueprint, by `on.name` notation.
@@ -198,19 +194,18 @@ bp = FactoryBot::Blueprint.plan do
   end
 end
 
-_, objects = FactoryBot::Blueprint.build(bp) do
+FactoryBot::Blueprint.build(bp) do
   on.blog(category: "Daily log") do  # adds an argument (category: "Daily log")
     article(title: "New article")    # adds an article
   end
 end
-
-objects
 #=>
 #{:user => #<User name="John">,
 # :blog => #<Blog title="John's Blog", category="Daily log", user=...>,
 # :_anon_c7f35f49d1ee => #<BlogArticle title="Article 1", blog=...>,
 # :_anon_463ea3ea9103 => #<BlogArticle title="Article 2", blog=...>,
-# :_anon_ea42e6980975 => #<BlogArticle title="New article", blog=...>}
+# :_anon_ea42e6980975 => #<BlogArticle title="New article", blog=...>,
+# :_result_ => #<User name="John">}
 ```
 
 #### External references
@@ -255,9 +250,9 @@ end
 let(:blog_blueprint_instance) { FactoryBot::Blueprint.build(blog_blueprint) }
 
 # 3. define the result and each named object using let
-let(:blog) { blog_blueprint_instance[0] }
-let(:article) { blog_blueprint_instance[1][:article] }
-let(:comment) { blog_blueprint_instance[1][:comment] }
+let(:blog) { blog_blueprint_instance[:_result_] }
+let(:article) { blog_blueprint_instance[:article] }
+let(:comment) { blog_blueprint_instance[:comment] }
 ```
 
 `factory_bot-blueprint-rspec` gem provides an all-in-one helper method `letbp` to do this.

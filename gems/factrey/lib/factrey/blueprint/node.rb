@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 require "set"
+require "securerandom"
 
 module Factrey
   class Blueprint
     # A node corresponds to an object to be created. A {Blueprint} consists of a set of nodes.
     class Node
+      # A name prefix given to anonymous nodes for convenience.
       ANONYMOUS_NAME_PREFIX = "_anon_"
+
+      # Name used for the node that hold the results of the blueprint.
+      RESULT_NAME = :_result_
 
       # @return [Symbol] name given to the object to be created
       attr_reader :name
@@ -33,6 +38,13 @@ module Factrey
         @ancestors = ancestors
         @args = args
         @kwargs = kwargs
+      end
+
+      # @param name [Symbol, nil]
+      # @param value [Object]
+      # @param ancestors [Array<Node>]
+      def self.computed(name, value, ancestors: [])
+        new(name, Blueprint::Type::COMPUTED, ancestors:, args: [value])
       end
 
       # @return [Ref]

@@ -37,8 +37,12 @@ module Factrey
       raise TypeError, "blueprint must be a Blueprint" if blueprint && !blueprint.is_a?(Blueprint)
       raise TypeError, "dsl must be a subclass of DSL" unless dsl <= DSL
 
+      is_extending = !blueprint.nil?
       blueprint ||= Blueprint.new
-      blueprint.define_result dsl.new(blueprint:, ext:).instance_eval(&) if block_given?
+
+      result = block_given? ? dsl.new(blueprint:, ext:).instance_eval(&) : nil
+      blueprint.add_node(Blueprint::Node.computed(Blueprint::Node::RESULT_NAME, result)) unless is_extending
+
       blueprint
     end
   end

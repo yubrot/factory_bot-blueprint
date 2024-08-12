@@ -18,40 +18,38 @@ RSpec.describe Factrey::Blueprint::Instantiator do
 
     context "with an empty blueprint" do
       it "creates no objects" do
-        expect(subject).to eq([nil, {}])
+        expect(subject).to eq({})
       end
     end
 
     context "with single node" do
       before do
-        blueprint.add_node(:foo, author, args: [1, :hello], kwargs: { hoge: "fuga" })
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author, args: [1, :hello], kwargs: { hoge: "fuga" }))
       end
 
       it "creates objects" do
-        expect(subject[0]).to be_nil
-        expect(subject[1]).to eq(foo: [:create, :author, 1, :hello, { hoge: "fuga" }])
+        expect(subject).to eq(foo: [:create, :author, 1, :hello, { hoge: "fuga" }])
       end
     end
 
-    context "with single node and result" do
+    context "with single computed node" do
       before do
-        blueprint.add_node(:foo, author, args: [1, :hello], kwargs: { hoge: "fuga" })
-        blueprint.define_result(ref.foo)
+        blueprint.add_node(Factrey::Blueprint::Node.computed(:foo, 123))
       end
 
-      it "creates objects and computes the result" do
-        expect(subject[0]).to eq(subject[1][:foo])
+      it "creates objects" do
+        expect(subject).to eq(foo: 123)
       end
     end
 
     context "with multiple nodes" do
       before do
-        blueprint.add_node(:foo, author)
-        blueprint.add_node(:bar, blog)
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog))
       end
 
       it "creates objects" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           foo: [:create, :author, {}],
           bar: [:create, :blog, {}],
         )
@@ -60,38 +58,38 @@ RSpec.describe Factrey::Blueprint::Instantiator do
 
     context "with references" do
       before do
-        blueprint.add_node(:foo, author, args: [ref.bar])
-        blueprint.add_node(:bar, blog)
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author, args: [ref.bar]))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog))
       end
 
       it "creates objects" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           bar: [:create, :blog, {}],
-          foo: [:create, :author, subject[1][:bar], {}],
+          foo: [:create, :author, subject[:bar], {}],
         )
       end
     end
 
     context "with more complex references" do
       before do
-        blueprint.add_node(:foo, author, kwargs: { follows: [] })
-        blueprint.add_node(:bar, author, kwargs: { follows: [ref.foo] })
-        blueprint.add_node(:baz, author, kwargs: { follows: [ref.foo, ref.bar] })
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author, kwargs: { follows: [] }))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, author, kwargs: { follows: [ref.foo] }))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, author, kwargs: { follows: [ref.foo, ref.bar] }))
       end
 
       it "creates objects" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           foo: [:create, :author, { follows: [] }],
-          bar: [:create, :author, { follows: [subject[1][:foo]] }],
-          baz: [:create, :author, { follows: [subject[1][:foo], subject[1][:bar]] }],
+          bar: [:create, :author, { follows: [subject[:foo]] }],
+          baz: [:create, :author, { follows: [subject[:foo], subject[:bar]] }],
         )
       end
     end
 
     context "with circular references" do
       before do
-        blueprint.add_node(:foo, author, args: [ref.bar])
-        blueprint.add_node(:bar, blog, args: [ref.foo])
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author, args: [ref.bar]))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, args: [ref.foo]))
       end
 
       it "fails" do
@@ -101,7 +99,7 @@ RSpec.describe Factrey::Blueprint::Instantiator do
 
     context "with missing references" do
       before do
-        blueprint.add_node(:foo, author, args: [ref.bar])
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author, args: [ref.bar]))
       end
 
       it "fails" do
@@ -111,62 +109,62 @@ RSpec.describe Factrey::Blueprint::Instantiator do
 
     context "with auto references" do
       before do
-        foo = blueprint.add_node(:foo, author)
-        bar = blueprint.add_node(:bar, blog, ancestors: [foo])
-        blueprint.add_node(:baz, post, ancestors: [foo, bar])
+        foo = blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
+        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, ancestors: [foo]))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, post, ancestors: [foo, bar]))
       end
 
       it "creates objects with auto references" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           foo: [:create, :author, {}],
-          bar: [:create, :blog, { author: subject[1][:foo] }],
-          baz: [:create, :post, { blog: subject[1][:bar] }],
+          bar: [:create, :blog, { author: subject[:foo] }],
+          baz: [:create, :post, { blog: subject[:bar] }],
         )
       end
     end
 
     context "with auto references and multiple candidates in ancestors" do
       before do
-        foo = blueprint.add_node(:foo, author)
-        bar = blueprint.add_node(:bar, author, ancestors: [foo])
-        blueprint.add_node(:baz, blog, ancestors: [foo, bar])
+        foo = blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
+        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, author, ancestors: [foo]))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, blog, ancestors: [foo, bar]))
       end
 
       it "creates objects with auto references and the nearest ancestor is selected" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           foo: [:create, :author, {}],
           bar: [:create, :author, {}],
-          baz: [:create, :blog, { author: subject[1][:bar] }],
+          baz: [:create, :blog, { author: subject[:bar] }],
         )
       end
     end
 
     context "with auto references and compatible types" do
       before do
-        foo = blueprint.add_node(:foo, guest_author)
-        blueprint.add_node(:bar, blog, ancestors: [foo])
+        foo = blueprint.add_node(Factrey::Blueprint::Node.new(:foo, guest_author))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, ancestors: [foo]))
       end
 
       it "creates objects with auto references and compatible types are also considered" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           foo: [:create, :guest_author, {}],
-          bar: [:create, :blog, { author: subject[1][:foo] }],
+          bar: [:create, :blog, { author: subject[:foo] }],
         )
       end
     end
 
     context "with auto references and explicit arguments" do
       before do
-        blueprint.add_node(:foo, author)
-        bar = blueprint.add_node(:bar, author)
-        blueprint.add_node(:baz, blog, ancestors: [bar], kwargs: { author: ref.foo })
+        blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
+        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, author))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, blog, ancestors: [bar], kwargs: { author: ref.foo }))
       end
 
       it "creates objects and explicit arguments take precedence" do
-        expect(subject[1]).to eq(
+        expect(subject).to eq(
           foo: [:create, :author, {}],
           bar: [:create, :author, {}],
-          baz: [:create, :blog, { author: subject[1][:foo] }],
+          baz: [:create, :blog, { author: subject[:foo] }],
         )
       end
     end
