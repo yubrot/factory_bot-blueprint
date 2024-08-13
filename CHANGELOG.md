@@ -1,5 +1,13 @@
 ## [Unreleased]
 
+## [0.4.0] - 2024/08/13
+
+- Added: `let` notation now accepts any computed values, e.g., `let.foo = [user(1), user(2)]`
+- Added: Added support for abbreviating object names based on ancestor objects, e.g., `blog { blog_article }` to `blog { article }`
+- **Changed**: Changed `let` notation syntax from `let(:name).object` to `let.name = object`
+- **Changed**: Removed `let_default_name`; now `let` uses the method name as the default name
+- **Changed**: Blueprint result values are now also represented as a single node
+
 ## [0.3.0] - 2024/07/30
 
 - Added `let!` version methods to RSpec helpers

@@ -7,6 +7,18 @@ AllCops:
   SuggestExtensions:
     rubocop-rake: false
 
+RSpec:
+  Language:
+    Helpers:
+      - let_blueprint
+      - let_blueprint_build
+      - let_blueprint_create
+      - letbp
+      - let_blueprint!
+      - let_blueprint_build!
+      - let_blueprint_create!
+      - letbp!
+
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 

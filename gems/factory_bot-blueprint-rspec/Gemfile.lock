@@ -1,20 +1,20 @@
 PATH
   remote: ../factory_bot-blueprint
   specs:
-    factory_bot-blueprint (0.3.0)
+    factory_bot-blueprint (0.4.0)
       factory_bot (~> 6.0)
-      factrey (~> 0.3.0)
+      factrey (~> 0.4.0)
 
 PATH
   remote: ../factrey
   specs:
-    factrey (0.3.0)
+    factrey (0.4.0)
 
 PATH
   remote: .
   specs:
-    factory_bot-blueprint-rspec (0.3.0)
-      factory_bot-blueprint (~> 0.3.0)
+    factory_bot-blueprint-rspec (0.4.0)
+      factory_bot-blueprint (~> 0.4.0)
       rspec-core (~> 3.0)
 
 GEM
