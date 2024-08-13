@@ -290,6 +290,22 @@ RSpec.describe "something" do
 end
 ```
 
+If you are using [`rubocop-rspec`](https://github.com/rubocop/rubocop-rspec), you can have these helpers recognized as a group of `let`'s by the following configuration in `.rubocop.yml`.
+
+```yaml
+RSpec:
+  Language:
+    Helpers:
+      - let_blueprint
+      - let_blueprint_build
+      - let_blueprint_create
+      - letbp
+      - let_blueprint!
+      - let_blueprint_build!
+      - let_blueprint_create!
+      - letbp!
+```
+
 ## Development
 
 ```sh
