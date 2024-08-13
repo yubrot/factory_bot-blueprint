@@ -3,10 +3,10 @@
 # This module contains data types and factories for testing this gem.
 module Test
   # TESTING aliases
-  User = Struct.new(:name)
-  Post = Struct.new(:title, :author)
-  Comment = Struct.new(:text, :commenter)
-  Account = Struct.new(:user)
+  User = Struct.new(:name, keyword_init: true)
+  Post = Struct.new(:title, :author, keyword_init: true)
+  Comment = Struct.new(:text, :commenter, keyword_init: true)
+  Account = Struct.new(:user, keyword_init: true)
 
   FactoryBot.define do
     factory(:user, class: "Test::User", aliases: %i[author commenter])
@@ -16,8 +16,8 @@ module Test
   end
 
   # TESTING parent
-  Color = Struct.new(:code)
-  Gradient = Struct.new(:from, :to)
+  Color = Struct.new(:code, keyword_init: true)
+  Gradient = Struct.new(:from, :to, keyword_init: true)
 
   FactoryBot.define do
     factory(:color, class: "Test::Color") do
@@ -30,8 +30,8 @@ module Test
   end
 
   # TESTING auto_complete
-  Customer = Struct.new(:id, :plan)
-  CustomerProfile = Struct.new(:name, :customer)
+  Customer = Struct.new(:id, :plan, keyword_init: true)
+  CustomerProfile = Struct.new(:name, :customer, keyword_init: true)
 
   FactoryBot.define do
     factory(:customer, class: "Test::Customer") do
@@ -41,9 +41,9 @@ module Test
   end
 
   # TESTING traits
-  Video = Struct.new(:title)
-  Photo = Struct.new(:title)
-  Tag = Struct.new(:taggable)
+  Video = Struct.new(:title, keyword_init: true)
+  Photo = Struct.new(:title, keyword_init: true)
+  Tag = Struct.new(:taggable, keyword_init: true)
 
   FactoryBot.define do
     factory(:video, class: "Test::Video")
@@ -60,9 +60,9 @@ module Test
   end
 
   # TESTING inline associations
-  Student = Struct.new(:school, :profile, :name)
-  Profile = Struct.new(:school, :student, :name)
-  School = Struct.new(:name)
+  Student = Struct.new(:school, :profile, :name, keyword_init: true)
+  Profile = Struct.new(:school, :student, :name, keyword_init: true)
+  School = Struct.new(:name, keyword_init: true)
 
   FactoryBot.define do
     factory :student, class: "Test::Student" do

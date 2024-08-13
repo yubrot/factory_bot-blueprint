@@ -3,10 +3,10 @@
 # This module contains data types and factories for testing this gem.
 module Test
   # TESTING aliases
-  User = Struct.new(:name)
-  Blog = Struct.new(:title, :user)
-  Article = Struct.new(:title, :blog)
-  Comment = Struct.new(:text, :article)
+  User = Struct.new(:name, keyword_init: true)
+  Blog = Struct.new(:title, :user, keyword_init: true)
+  Article = Struct.new(:title, :blog, keyword_init: true)
+  Comment = Struct.new(:text, :article, keyword_init: true)
 
   FactoryBot.define do
     factory(:user, class: "Test::User")
