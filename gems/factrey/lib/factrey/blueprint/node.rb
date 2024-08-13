@@ -9,7 +9,6 @@ module Factrey
     class Node
       # A name prefix given to anonymous nodes for convenience.
       ANONYMOUS_NAME_PREFIX = "_anon_"
-
       # Name used for the node that hold the results of the blueprint.
       RESULT_NAME = :_result_
 
@@ -47,14 +46,24 @@ module Factrey
         new(name, Blueprint::Type::COMPUTED, ancestors:, args: [value])
       end
 
-      # @return [Ref]
-      def to_ref = Ref.new(name)
-
-      # @return [Boolean]
-      def root? = ancestors.empty?
-
       # @return [Boolean]
       def anonymous? = name.start_with?(ANONYMOUS_NAME_PREFIX)
+
+      # @return [Boolean]
+      def result? = name == RESULT_NAME
+
+      # @return [Ref] the reference to this node
+      def to_ref = Ref.new(name)
+
+      # @return [Ref, nil] if this node works as an alias to another node, return the reference to the node
+      def alias_ref
+        case [@type, args]
+        in Blueprint::Type::COMPUTED, [Ref => ref]
+          ref
+        else
+          nil
+        end
+      end
 
       # Used for debugging and error reporting.
       # @return [String]

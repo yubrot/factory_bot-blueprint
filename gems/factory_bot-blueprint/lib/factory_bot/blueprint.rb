@@ -46,12 +46,12 @@ module FactoryBot
       #   # This behaves as:
       #   objects = {}
       #   objects[:blog] = blog = FactoryBot.build(:blog)
-      #   objects[gen_random_sym] = FactoryBot.build(:article, title: "Article 1", blog:)
-      #   objects[gen_random_sym] = FactoryBot.build(:article, title: "Article 2", blog:)
-      #   objects[gen_random_sym] = article3 = FactoryBot.build(:article, title: "Article 3", blog:)
-      #   objects[gen_random_sym] = FactoryBot.build(:comment, name: "John", article: article3)
-      #   objects[gen_random_sym] = FactoryBot.build(:comment, name: "Doe", article: article3)
-      #   objects[:_result_] = blog
+      #   objects[random_anon_sym] = FactoryBot.build(:article, title: "Article 1", blog:)
+      #   objects[random_anon_sym] = FactoryBot.build(:article, title: "Article 2", blog:)
+      #   objects[random_anon_sym] = article3 = FactoryBot.build(:article, title: "Article 3", blog:)
+      #   objects[random_anon_sym] = FactoryBot.build(:comment, name: "John", article: article3)
+      #   objects[random_anon_sym] = FactoryBot.build(:comment, name: "Doe", article: article3)
+      #   objects[Factrey::Blueprint::Node::RESULT_NAME] = blog
       def plan(blueprint = nil, ext: nil, &) = Factrey.blueprint(blueprint, ext:, dsl: DSL, &)
 
       # Create a set of objects by <code>build</code> strategy in FactoryBot.

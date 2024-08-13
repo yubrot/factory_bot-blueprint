@@ -45,6 +45,18 @@ module Factrey
       node
     end
 
+    # Resolve a node.
+    # @param name [Symbol]
+    # @param follow_alias [Boolean] whether to follow an alias node. See {Node#alias_ref}
+    # @return [Node, nil]
+    def resolve_node(name, follow_alias: true)
+      node = nodes[name]
+      return node unless follow_alias
+
+      ref = node&.alias_ref
+      ref ? resolve_node(ref.name) : node
+    end
+
     # Create a set of objects based on this blueprint.
     # @param context [Object] context object to be passed to the factories
     # @return [Hash{Symbol => Object}] the created objects

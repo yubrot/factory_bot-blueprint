@@ -61,7 +61,7 @@ RSpec.describe Factrey::DSL do
       subject { blueprint { 123 } }
 
       it "defines the result" do
-        expect(subject.nodes[:_result_]).to have_attributes(
+        expect(subject.resolve_node(:_result_)).to have_attributes(
           type: Factrey::Blueprint::Type::COMPUTED,
           args: [123],
         )
@@ -71,7 +71,7 @@ RSpec.describe Factrey::DSL do
         subject { blueprint(blueprint { 123 }) { 456 } }
 
         it "does not overwrite the result" do
-          expect(subject.nodes[:_result_]).to have_attributes(
+          expect(subject.resolve_node(:_result_)).to have_attributes(
             type: Factrey::Blueprint::Type::COMPUTED,
             args: [123],
           )
@@ -79,11 +79,11 @@ RSpec.describe Factrey::DSL do
       end
     end
 
-    describe "#node" do
+    describe "#object_node" do
       # We use #node through helper methods defined by .add_type
       subject { blueprint { user } }
 
-      it "adds a node and returns the reference to the node" do
+      it "adds an object node and returns the reference to the node" do
         expect(subject.nodes.values.to_a).to match [
           have_attributes(
             name: start_with("_anon_"),
@@ -92,7 +92,7 @@ RSpec.describe Factrey::DSL do
             args: [],
             kwargs: {},
           ),
-          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
         ]
       end
 
@@ -110,7 +110,7 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [123]),
             have_attributes(kwargs: { foo: 456 }),
             have_attributes(args: [], kwargs: {}),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[2].name)]),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[2].name)]), # result
           ]
         end
       end
@@ -133,7 +133,7 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [2], ancestors: [0].map { subject.nodes.values[_1] }),
             have_attributes(args: [3], ancestors: [0, 1].map { subject.nodes.values[_1] }),
             have_attributes(args: [4], ancestors: [0, 1].map { subject.nodes.values[_1] }),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
           ]
         end
       end
@@ -153,9 +153,26 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [1], kwargs: {}),
             have_attributes(args: [2], kwargs: { user: subject.nodes.values[0].to_ref }),
             have_attributes(args: [3], kwargs: { user: subject.nodes.values[1].to_ref }),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
+            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
           ]
         end
+      end
+    end
+
+    describe "#computed_node" do
+      subject { blueprint { computed_node(:foo, 123) } }
+
+      it "adds a computed node and returns the reference to the node" do
+        expect(subject.nodes.values.to_a).to match [
+          have_attributes(
+            name: :foo,
+            type: Factrey::Blueprint::Type::COMPUTED,
+            ancestors: [],
+            args: [123],
+            kwargs: {},
+          ),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
+        ]
       end
     end
 
@@ -167,7 +184,7 @@ RSpec.describe Factrey::DSL do
       it "returns an object set at Factrey.blueprint" do
         expect(subject.nodes.values.to_a).to match [
           have_attributes(kwargs: { name: "FOO" }),
-          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
+          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
         ]
       end
     end
@@ -175,18 +192,23 @@ RSpec.describe Factrey::DSL do
     describe "#let" do
       subject do
         blueprint do
-          user
-          let.user
-          let(:author).user
+          user("A")
+          let.user("B")
+          let.author = user("C")
         end
       end
 
       it "gives names to nodes" do
-        expect(subject.nodes.values.to_a).to match [
-          have_attributes(name: start_with("_anon_")),
-          have_attributes(name: :user),
-          have_attributes(name: :author),
-          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[2].name)]),
+        objects, aliases = subject.nodes.values.partition(&:anonymous?)
+        expect(objects).to match [
+          have_attributes(args: ["A"]),
+          have_attributes(args: ["B"]),
+          have_attributes(args: ["C"]),
+        ]
+        expect(aliases).to match [
+          have_attributes(name: :user, args: [Factrey::Ref.new(objects[1].name)]),
+          have_attributes(name: :author, args: [Factrey::Ref.new(objects[2].name)]),
+          have_attributes(args: [Factrey::Ref.new(objects[2].name)]), # result
         ]
       end
 
@@ -203,48 +225,15 @@ RSpec.describe Factrey::DSL do
         end
       end
 
-      context "when let is used without node declaration" do
-        subject do
-          blueprint do
-            let { nil }
-            user
-          end
-        end
-
-        # NOTE: Should we issue some kind of warning?
-        it "does not affect other declarations" do
-          expect(subject.nodes.values.to_a).to match [
-            have_attributes(name: start_with("_anon_")),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
-          ]
-        end
-      end
-
-      context "when let is used with multiple node declarations" do
-        subject do
-          blueprint do
-            let(:foo) do
-              user
-              user
-            end
-          end
-        end
-
-        # NOTE: Should we issue some kind of warning?
-        it "is only applied to the first declaration" do
-          expect(subject.nodes.values.to_a).to match [
-            have_attributes(name: :foo),
-            have_attributes(name: start_with("_anon_")),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[1].name)]),
-          ]
-        end
-      end
-
       context "when let is nested" do
-        subject { blueprint { let.let.user } }
+        subject { blueprint { let.foo = let.bar = 123 } }
 
-        it "is an error" do
-          expect { subject }.to raise_error ArgumentError
+        it "works independently (as Ruby's language specification)" do
+          expect(subject.nodes.values.to_a).to match [
+            have_attributes(name: :bar, args: [123]),
+            have_attributes(name: :foo, args: [123]),
+            have_attributes(args: [123]), # result
+          ]
         end
       end
     end
@@ -253,48 +242,44 @@ RSpec.describe Factrey::DSL do
       subject do
         blueprint do
           let.user
-          on(:user, 12, 34)
-          on(:user, 56, hello: "world")
-          on(:user) { let(:user2).user }
+          on.user(12, 34)
+          on.user(56, hello: "world")
+          on.user { let.user2 = user(78) }
         end
       end
 
       it "alters the node resolved by name and returns the reference to the node" do
-        expect(subject.nodes.values.to_a).to match [
-          have_attributes(
-            name: :user,
-            args: [12, 34, 56],
-            kwargs: { hello: "world" },
-          ),
-          have_attributes(
-            name: :user2,
-            ancestors: [subject.nodes[:user]],
-          ),
-          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]),
-        ]
+        expect(subject.resolve_node(:user)).to have_attributes(
+          args: [12, 34, 56],
+          kwargs: { hello: "world" },
+        )
+        expect(subject.resolve_node(:user2)).to have_attributes(
+          args: [78],
+          ancestors: [subject.resolve_node(:user)],
+        )
+        expect(subject.nodes.values.last).to have_attributes(
+          args: [Factrey::Ref.new(subject.resolve_node(:user).name)],
+        )
       end
 
       context "when #on is used in another block" do
         subject do
           blueprint do
-            let.user
-            let(:user2).user do
-              let(:user3).user
-              on(:user) { let(:user4).user }
-              let(:user5).user
+            let.user1 = user
+            let.user2 = user do
+              let.user3 = user
+              on.user1 { let.user4 = user }
+              let.user5 = user
             end
           end
         end
 
         it "does not affect ancestors outside block" do
-          expect(subject.nodes.values.to_a).to match [
-            have_attributes(name: :user, ancestors: []),
-            have_attributes(name: :user2, ancestors: []),
-            have_attributes(name: :user3, ancestors: [subject.nodes[:user2]]),
-            have_attributes(name: :user4, ancestors: [subject.nodes[:user]]),
-            have_attributes(name: :user5, ancestors: [subject.nodes[:user2]]),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[1].name)]),
-          ]
+          expect(subject.resolve_node(:user1)).to have_attributes(ancestors: [])
+          expect(subject.resolve_node(:user2)).to have_attributes(ancestors: [])
+          expect(subject.resolve_node(:user3)).to have_attributes(ancestors: [subject.resolve_node(:user2)])
+          expect(subject.resolve_node(:user4)).to have_attributes(ancestors: [subject.resolve_node(:user1)])
+          expect(subject.resolve_node(:user5)).to have_attributes(ancestors: [subject.resolve_node(:user2)])
         end
       end
 
@@ -329,6 +314,19 @@ RSpec.describe Factrey::DSL do
 
       context "when #args is used without a node declaration" do
         subject { blueprint { args :foo } }
+
+        it "fails with an error" do
+          expect { subject }.to raise_error NameError
+        end
+      end
+
+      context "when #args is used for a computed node declaration" do
+        subject do
+          blueprint do
+            let.foo = 123
+            on.foo(456)
+          end
+        end
 
         it "fails with an error" do
           expect { subject }.to raise_error NameError

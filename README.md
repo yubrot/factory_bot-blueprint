@@ -48,28 +48,26 @@ FactoryBot::Blueprint.build(bp) # or FactoryBot::Blueprint.create
 #=>
 #{:_anon_9ea309fe2cd1 => #<User name="John">,
 # :_result_ => #<User name="John">}
-# Notice that the :_result_ (Factrey::Blueprint::Node::RESULT_NAME) holds the DSL code block result
 ```
 
-The DSL, described in detail below, supports declaring and naming multiple objects.
+As you can see, the creation result is a `Hash`, and objects are given random names start with `_anon_`. It is also notice that the `:_result_` (`Factrey::Blueprint::Node::RESULT_NAME`) holds the DSL code block result.
+
+The DSL, described in detail below, supports declaring multiple objects and naming.
 
 ```ruby
 # FactoryBot::Blueprint.build can also take a DSL code block directly
 FactoryBot::Blueprint.build do
-  let(:kevin).user(name: "Kevin")
+  let.kevin = user(name: "Kevin")
   user(name: "User 1")
   user(name: "User 2")
-  user(name: "User 3")
 end
 #=>
 #{:kevin => #<User name="Kevin">,
+# :_anon_d3461b354de6 => #<User name="Kevin">,
 # :_anon_ee5f94e77718 => #<User name="User 1">,
 # :_anon_2a70dd71bdac => #<User name="User 2">,
-# :_anon_d3461b354de6 => #<User name="User 3">,
-# :_result_ => #<User name="User 3">}
+# :_result_ => #<User name="User 2">}
 ```
-
-As you can see, the creation result is a `Hash`, and unnamed objects are given random names.
 
 ### The Blueprint DSL
 
@@ -101,8 +99,8 @@ This can be rewritten in FactoryBot::Blueprint as follows:
 
 ```ruby
 objects = FactoryBot::Blueprint.create do
-  let(:author).author(name: "John")
-  let(:blog).blog(name: "John's Blog", author: ref.author)
+  let.author = author(name: "John")
+  let.blog = blog(name: "John's Blog", author: ref.author)
   blog_article(title: "Article 1", blog: ref.blog)
   blog_article(title: "Article 2", blog: ref.blog)
   blog_article(title: "Article 3", blog: ref.blog)
@@ -112,12 +110,12 @@ objects => { author:, blog: }
 
 It's not that interesting, but
 
-- By prefixing `let(name).`, you can name an object.
-- You can refer to objects in the DSL with the notation `ref.name`.
+- By using the notation `let.name =`, you can declare a named node.
+- You can refer to nodes in the DSL with the notation `ref.name`.
 
 From here, several simplifications can be made.
 
-First, `let(name)` can omit `name` if it is the same name as the method:
+First, we can use simplify `let.name = name(...)` to `let.name(...)`.
 
 ```ruby
 objects = FactoryBot::Blueprint.create do
@@ -152,7 +150,7 @@ This auto-reference will work automatically for any association of any traits in
 [^2]: Except [inline associations](https://thoughtbot.github.io/factory_bot/associations/inline-definition.html). It seems that it is difficult to support this
 [^3]: See [blueprint_spec.rb](./gems/factory_bot-blueprint/spec/factory_bot/blueprint_spec.rb) (together with [factories.rb](./gems/factory_bot-blueprint/spec/factories.rb)) for detailed behavior
 
-Finally, wen can omit part of the object name based on the ancestor objects.
+Finally, we can omit part of the object name based on the ancestor objects.
 
 ```ruby
 objects = FactoryBot::Blueprint.create do
@@ -179,8 +177,9 @@ FactoryBot::Bluepirnt.build(bp)
 #{:_anon_e1f15f805023 => #<User name="Some User">,
 # :_anon_b26e69c8d36b => #<User name="More User">,
 # :_result_ => #<User name="Some User">}
-# the :_result_ is not overwritten by extending the blueprint
 ```
+
+Notice that the `:_result_` is not overwritten when extending the blueprint.
 
 It is also possible to add arguments and child objects to the existing object declaration in the blueprint, by `on.name` notation.
 
@@ -202,9 +201,7 @@ end
 #=>
 #{:user => #<User name="John">,
 # :blog => #<Blog title="John's Blog", category="Daily log", user=...>,
-# :_anon_c7f35f49d1ee => #<BlogArticle title="Article 1", blog=...>,
-# :_anon_463ea3ea9103 => #<BlogArticle title="Article 2", blog=...>,
-# :_anon_ea42e6980975 => #<BlogArticle title="New article", blog=...>,
+# ...
 # :_result_ => #<User name="John">}
 ```
 

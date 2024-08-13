@@ -49,10 +49,14 @@ RSpec.describe Factrey::Blueprint do
   end
 
   describe "#add_node" do
-    it "is covered by the Factrey::DSL spec"
+    skip "is covered by the Factrey::DSL spec"
+  end
+
+  describe "#resolve_node" do
+    skip "is also covered by the Factrey::DSL spec"
   end
 
   describe "#instantiate" do
-    it "is covered by the Factrey::Blueprint::Instantiator spec"
+    skip "is covered by the Factrey::Blueprint::Instantiator spec"
   end
 end

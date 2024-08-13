@@ -10,7 +10,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
 
     it "works as a shorthand method for ::FactoryBot::Blueprint.plan" do
       expect(foo).to be_a Factrey::Blueprint
-      expect(foo.nodes[:user]).to have_attributes(kwargs: { name: "John" })
+      expect(foo.resolve_node(:user)).to have_attributes(kwargs: { name: "John" })
     end
 
     describe "inherit: true" do
@@ -19,10 +19,8 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
       end
 
       it "extends a blueprint obtained from super()" do
-        expect(foo.nodes).to include(
-          user: have_attributes(kwargs: { name: "John" }),
-          blog: have_attributes(kwargs: { title: "Inherited" }),
-        )
+        expect(foo.resolve_node(:user)).to have_attributes(kwargs: { name: "John" })
+        expect(foo.resolve_node(:blog)).to have_attributes(kwargs: { title: "Inherited" })
       end
     end
   end
@@ -93,7 +91,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
     describe "inherit: true" do
       letbp(:user, %i[article2], inherit: true) do
         on.blog do
-          let(:article2).article(title: "Article 3")
+          let.article2 = article(title: "Article 3")
         end
       end
 
@@ -114,8 +112,8 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
     it "is evaluated before tests" do
       user_name[:value] = "Jane"
 
-      expect(foo.nodes[:user]).to have_attributes(kwargs: { name: "Jane" })
-      expect(bar.nodes[:user]).to have_attributes(kwargs: { name: "John" })
+      expect(foo.resolve_node(:user)).to have_attributes(kwargs: { name: "Jane" })
+      expect(bar.resolve_node(:user)).to have_attributes(kwargs: { name: "John" })
     end
   end
 

@@ -62,19 +62,19 @@ RSpec.describe FactoryBot::Blueprint do
       subject do
         build do
           let.user(name: "A") do
-            let(:user_account).account
-            let(:user_post).post
-            let(:user_comment).comment
+            let.user_account = account
+            let.user_post = post
+            let.user_comment = comment
           end
           let.author(name: "B") do
-            let(:author_account).account
-            let(:author_post).post
-            let(:author_comment).comment
+            let.author_account = account
+            let.author_post = post
+            let.author_comment = comment
           end
           let.commenter(name: "C") do
-            let(:commenter_account).account
-            let(:commenter_post).post
-            let(:commenter_comment).comment
+            let.commenter_account = account
+            let.commenter_post = post
+            let.commenter_comment = comment
           end
         end
       end
@@ -105,8 +105,8 @@ RSpec.describe FactoryBot::Blueprint do
     context "with FactoryBot parents and same type associations" do
       subject do
         build do
-          let.color(code: "red") { let(:color_grad).gradient }
-          let.white { let(:white_grad).gradient }
+          let.color(code: "red") { let.color_grad = gradient }
+          let.white { let.white_grad = gradient }
         end
       end
 
@@ -124,7 +124,7 @@ RSpec.describe FactoryBot::Blueprint do
       subject do
         build do
           let.customer(id: 1) { let.profile(name: "John") }
-          let.premium_customer(id: 2) { let(:premium_customer_profile).profile(name: "Doe") }
+          let.premium_customer(id: 2) { let.premium_customer_profile = profile(name: "Doe") }
         end
       end
 
@@ -142,14 +142,14 @@ RSpec.describe FactoryBot::Blueprint do
       subject do
         build do
           let.video(title: "A") do
-            let(:video_tag).tag
-            let(:video_photo).photo(title: "A-1") { let(:video_photo_tag).tag }
-            let(:video_video).video(title: "A-2") { let(:video_video_tag).tag }
+            let.video_tag = tag
+            let.video_photo = photo(title: "A-1") { let.video_photo_tag = tag }
+            let.video_video = video(title: "A-2") { let.video_video_tag = tag }
           end
           let.photo(title: "B") do
-            let(:photo_tag).tag
-            let(:photo_photo).photo(title: "B-1") { let(:photo_photo_tag).tag }
-            let(:photo_video).video(title: "B-2") { let(:photo_video_tag).tag }
+            let.photo_tag = tag
+            let.photo_photo = photo(title: "B-1") { let.photo_photo_tag = tag }
+            let.photo_video = video(title: "B-2") { let.photo_video_tag = tag }
           end
         end
       end
@@ -176,9 +176,9 @@ RSpec.describe FactoryBot::Blueprint do
       subject do
         build do
           let.school(name: "S") do
-            let(:a).student(name: "A")
-            let(:b).profile(name: "B")
-            let(:c).student(name: "C") { let(:cp).profile(name: "CP") }
+            let.a = student(name: "A")
+            let.b = profile(name: "B")
+            let.c = student(name: "C") { let.cp = profile(name: "CP") }
           end
         end
       end
