@@ -65,7 +65,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
     end
   end
 
-  describe "#let_blueprint_create" do
+  describe "#let_blueprint_build_stubbed and #let_blueprint_create" do
     it "is a variation of #let_blueprint_build"
   end
 
@@ -131,7 +131,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
     end
   end
 
-  describe "#let_blueprint_create!" do
+  describe "#let_blueprint_build_stubbed! and #let_blueprint_create!" do
     it "is a variation of #let_blueprint_build!"
   end
 

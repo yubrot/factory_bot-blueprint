@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Factrey::Blueprint::Instantiator do
-  def factory = ->(type, context, *args, **kwargs) { [context[:strategy], type.name, *args, kwargs] }
+  def factory = ->(type, context, *args, **kwargs) { [context[:build_strategy], type.name, *args, kwargs] }
   def ref = Factrey::Ref::Builder.new
 
   let(:author) { Factrey::Blueprint::Type.new(:author, &factory) }
@@ -14,7 +14,7 @@ RSpec.describe Factrey::Blueprint::Instantiator do
     subject { blueprint.instantiate(context) }
 
     let(:blueprint) { Factrey::Blueprint.new }
-    let(:context) { { strategy: :create } }
+    let(:context) { { build_strategy: :create } }
 
     context "with an empty blueprint" do
       it "creates no objects" do

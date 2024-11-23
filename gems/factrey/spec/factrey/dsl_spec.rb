@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe Factrey::DSL do
-  def factory = ->(type, context, *args, **kwargs) { [context[:strategy], type.name, *args, kwargs] }
+  def factory = ->(type, context, *args, **kwargs) { [context[:build_strategy], type.name, *args, kwargs] }
 
   # Some example types for tests
   let(:user) { Factrey::Blueprint::Type.new(:user, &factory) }

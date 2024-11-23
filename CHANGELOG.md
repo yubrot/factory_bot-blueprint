@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+- Added: Add `build_stubbed` build strategy support
+
 ## [0.4.0] - 2024/08/13
 
 - Added: `let` notation now accepts any computed values, e.g., `let.foo = [user(1), user(2)]`

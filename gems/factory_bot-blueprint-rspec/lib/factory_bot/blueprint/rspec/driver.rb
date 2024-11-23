@@ -30,8 +30,8 @@ module FactoryBot
           name
         end
 
-        # Build objects by <code>build</code> strategy in FactoryBot from a blueprint and declare them using RSpec's
-        # <code>let</code>.
+        # Build objects by <code>build</code> build strategy in FactoryBot from a blueprint and declare them using
+        # RSpec's <code>let</code>.
         # @param map [Hash{Symbol => Object}]
         #   map data structure from source blueprints to instance definitions.
         #   Each instance will be built with <code>FactoryBot::Blueprint.build(__send__(source))</code>
@@ -62,17 +62,27 @@ module FactoryBot
         #   end
         def let_blueprint_build(**map) = let_blueprint_instantiate(:build, **map)
 
-        # Build objects by <code>create</code> strategy in FactoryBot from a blueprint and declare them using RSpec's
-        # <code>let</code>.
+        # Build objects by <code>build_stubbed</code> build strategy in FactoryBot from a blueprint and declare them
+        # using RSpec's <code>let</code>.
         # See {#let_blueprint_build} for more details.
         # @param map [Hash{Symbol => Object}]
         #   map data structure from source blueprints to instance definitions.
-        #   Each instance will be built with <code>FactoryBot::Blueprint.build(__send__(source))</code>
+        #   Each instance will be built with <code>FactoryBot::Blueprint.build_stubbed(__send__(source))</code>
+        def let_blueprint_build_stubbed(**map) = let_blueprint_instantiate(:build_stubbed, **map)
+
+        # Build objects by <code>create</code> build strategy in FactoryBot from a blueprint and declare them using
+        # RSpec's <code>let</code>.
+        # See {#let_blueprint_build} for more details.
+        # @param map [Hash{Symbol => Object}]
+        #   map data structure from source blueprints to instance definitions.
+        #   Each instance will be built with <code>FactoryBot::Blueprint.create(__send__(source))</code>
         def let_blueprint_create(**map) = let_blueprint_instantiate(:create, **map)
 
         # @!visibility private
-        def let_blueprint_instantiate(strategy, **map)
-          raise ArgumentError, "Unsupported strategy: #{strategy}" if strategy && !%i[create build].include?(strategy)
+        def let_blueprint_instantiate(build_strategy, **map)
+          if build_strategy && !%i[create build build_stubbed].include?(build_strategy)
+            raise ArgumentError, "Unsupported build strategy: #{build_strategy}"
+          end
 
           map.map do |source, definition|
             raise TypeError, "source must be a Symbol" unless source.is_a?(Symbol)
@@ -99,8 +109,8 @@ module FactoryBot
             end
             raise TypeError, "instance must be a Symbol" unless instance.is_a?(Symbol)
 
-            if strategy # If no strategy is specified, the instance is assumed to exist
-              let(instance) { ::FactoryBot::Blueprint.instantiate(strategy, __send__(source)) }
+            if build_strategy # If no build strategy is specified, the instance is assumed to exist
+              let(instance) { ::FactoryBot::Blueprint.instantiate(build_strategy, __send__(source)) }
             end
 
             let(result_name) { __send__(instance)[::Factrey::Blueprint::Node::RESULT_NAME] } if result_name
@@ -120,8 +130,8 @@ module FactoryBot
         #   It is also used as a name prefix of the blueprint
         # @param items [Array<Symbol>] names of the objects to be declared using RSpec's <code>let</code>
         # @param inherit [Boolean] whether to extend the blueprint by <code>super()</code>
-        # @param strategy [:create, :build]
-        #   FactoryBot strategy to use when building objects.
+        # @param strategy [:build, :build_stubbed, :create]
+        #   FactoryBot build strategy to use when building objects.
         #   This option is ignored if <code>inherit: true</code>
         # @yield Write Blueprint DSL code here
         # @example
@@ -151,7 +161,7 @@ module FactoryBot
           strategy = nil if inherit
 
           let_blueprint(source, inherit:, &)
-          let_blueprint_instantiate strategy, source => { result: name, items: }
+          let_blueprint_instantiate(strategy, source => { result: name, items: })
         end
 
         # <code>let!</code> version of {#let_blueprint}.
@@ -163,6 +173,12 @@ module FactoryBot
         # <code>let!</code> version of {#let_blueprint_build}.
         def let_blueprint_build!(...)
           names = let_blueprint_build(...)
+          before { names.each { __send__(_1) } }
+        end
+
+        # <code>let!</code> version of {#let_blueprint_build_stubbed}.
+        def let_blueprint_build_stubbed!(...)
+          names = let_blueprint_build_stubbed(...)
           before { names.each { __send__(_1) } }
         end
 

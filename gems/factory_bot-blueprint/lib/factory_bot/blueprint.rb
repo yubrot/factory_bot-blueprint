@@ -40,7 +40,7 @@ module FactoryBot
       #       end
       #     end
       #
-      #   # Create a set of objects in FactoryBot (with `build` strategy) from the blueprint:
+      #   # Create a set of objects in FactoryBot (with `build` build strategy) from the blueprint:
       #   objects = FactoryBot::Blueprint.build(bp)
       #
       #   # This behaves as:
@@ -54,7 +54,7 @@ module FactoryBot
       #   objects[Factrey::Blueprint::Node::RESULT_NAME] = blog
       def plan(blueprint = nil, ext: nil, &) = Factrey.blueprint(blueprint, ext:, dsl: DSL, &)
 
-      # Create a set of objects by <code>build</code> strategy in FactoryBot.
+      # Create a set of objects by <code>build</code> build strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
       # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
@@ -62,7 +62,15 @@ module FactoryBot
       # @return [Hash{Symbol => Object}] the created objects
       def build(blueprint = nil, ext: nil, &) = instantiate(:build, blueprint, ext:, &)
 
-      # Create a set of objects by <code>create</code> strategy in FactoryBot.
+      # Create a set of objects by <code>build_stubbed</code> build strategy in FactoryBot.
+      # See {.plan} for more details.
+      # @param blueprint [Factrey::Blueprint, nil]
+      # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
+      # @yield Write Blueprint DSL code here
+      # @return [Hash{Symbol => Object}] the created objects
+      def build_stubbed(blueprint = nil, ext: nil, &) = instantiate(:build_stubbed, blueprint, ext:, &)
+
+      # Create a set of objects by <code>create</code> build strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
       # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
@@ -71,10 +79,12 @@ module FactoryBot
       def create(blueprint = nil, ext: nil, &) = instantiate(:create, blueprint, ext:, &)
 
       # @!visibility private
-      def instantiate(strategy, blueprint = nil, ext: nil, &)
-        raise ArgumentError, "Unsupported strategy: #{strategy}" unless %i[create build].include?(strategy)
+      def instantiate(build_strategy, blueprint = nil, ext: nil, &)
+        unless %i[create build build_stubbed].include?(build_strategy)
+          raise ArgumentError, "Unsupported build strategy: #{build_strategy}"
+        end
 
-        plan(blueprint, ext:, &).instantiate(strategy:)
+        plan(blueprint, ext:, &).instantiate(build_strategy:)
       end
     end
   end

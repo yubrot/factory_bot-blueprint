@@ -208,7 +208,7 @@ RSpec.describe FactoryBot::Blueprint do
     end
   end
 
-  describe ".create" do
+  describe ".build_stubbed and .create" do
     it "is a variation of .build"
   end
 end

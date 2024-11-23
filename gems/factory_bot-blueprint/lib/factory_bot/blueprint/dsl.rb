@@ -65,7 +65,7 @@ module FactoryBot
         end
 
         FACTORY = lambda { |type, context, *args, **kwargs|
-          FactoryBot.__send__(context[:strategy], type.name, *args, **kwargs)
+          FactoryBot.__send__(context[:build_strategy], type.name, *args, **kwargs)
         }
 
         private_constant :FACTORY
