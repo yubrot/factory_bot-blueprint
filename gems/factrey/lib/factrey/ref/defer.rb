@@ -2,9 +2,9 @@
 
 module Factrey
   class Ref
-    # A thin wrapper around {Proc} to represent the procedure using the results of the reference resolution.
+    # A thin wrapper around <code>Proc</coode> to represent the procedure using the results of the reference resolution.
     # Each argument name is considered as a reference.
-    # These references are resolved and the results are passed to the {Proc}.
+    # These references are resolved and the results are passed to the <code>Proc</code>.
     #
     # {Ref}s and {Defer}s are usually created through {ShorthandMethods#ref}.
     class Defer

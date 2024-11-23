@@ -13,7 +13,8 @@ module Factrey
 
       # Traverse data recursively and resolve all {Ref}s and {Defer}s.
       #
-      # This method supports recursive traversal for {Array} and {Hash}. For other structures, consider using {Defer}.
+      # This method supports recursive traversal for <code>Array</code> and <code>Hash</code>. For other structures,
+      # consider using {Defer}.
       # @param object [Object]
       # @param recursion_count [Integer]
       def resolve(object, recursion_count: 0)

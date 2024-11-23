@@ -2,7 +2,7 @@
 
 module FactoryBot
   module Blueprint
-    # A declarative DSL for building {Factrey::Blueprint}.
+    # A declarative DSL for building {https://rubydoc.info/gems/factrey/Factrey/Blueprint Factrey::Blueprint}.
     # This DSL automatically recognizes factories defined in FactoryBot as types.
     class DSL < Factrey::DSL
       # Internals:

@@ -26,6 +26,7 @@ module FactoryBot
     #     end
     #   end
     module Methods
+      # @return [Class<FactoryBot::Blueprint>]
       def bp = FactoryBot::Blueprint
     end
   end

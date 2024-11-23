@@ -8,18 +8,21 @@ require_relative "blueprint/methods"
 
 module FactoryBot
   # A FactoryBot extension for building structured objects using a declarative DSL.
-  # First we can build (or extend) a creation plan for a set of objects as <code>Blueprint</code>,
+  # First we can build (or extend) a creation plan for a set of objects as
+  # {https://rubydoc.info/gems/factrey/Factrey/Blueprint Factrey::Blueprint},
   # and then we can create actual objects from it.
   #
-  # <code>Blueprint</code>s can be built using a declarative DSL provided by a core library called {Factrey}.
+  # <code>Blueprint</code>s can be built using a declarative DSL provided by a core library called <code>Factrey</code>.
   # Each node declaration in the DSL code is automatically correspond to the FactoryBot's factory. For example,
   # a declaration <code>user(name: 'John')</code> corresponds to <code>FactoryBot.create(:user, name: 'John')</code>.
   module Blueprint
     class << self
-      # Entry point to build or extend a {Factrey::Blueprint}.
+      # Entry point to build or extend a {https://rubydoc.info/gems/factrey/Factrey/Blueprint Factrey::Blueprint}.
       # @param blueprint [Factrey::Blueprint, nil] to extend an existing blueprint
-      # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
-      # @yield Write Blueprint DSL code here. See {Factrey::DSL} methods for DSL details
+      # @param ext [Object] an external object that can be accessed using <code>DSL#ext</code> in the DSL
+      # @yield
+      #   Write Blueprint DSL code here. See {https://rubydoc.info/gems/factrey/Factrey/DSL Factrey::DSL} documents for
+      #   more details
       # @return [Factrey::Blueprint] the built or extended blueprint
       # @example
       #   # In this example, we have three factories in FactoryBot:
@@ -58,7 +61,7 @@ module FactoryBot
       # Create a set of objects by <code>build</code> build strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
-      # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
+      # @param ext [Object] an external object that can be accessed using <code>DSL#ext</code> in the DSL
       # @yield Write Blueprint DSL code here
       # @return [Hash{Symbol => Object}] the created objects
       def build(blueprint = nil, ext: nil, &) = instantiate(:build, blueprint, ext:, &)
@@ -66,7 +69,7 @@ module FactoryBot
       # Create a set of objects by <code>build_stubbed</code> build strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
-      # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
+      # @param ext [Object] an external object that can be accessed using <code>DSL#ext</code> in the DSL
       # @yield Write Blueprint DSL code here
       # @return [Hash{Symbol => Object}] the created objects
       def build_stubbed(blueprint = nil, ext: nil, &) = instantiate(:build_stubbed, blueprint, ext:, &)
@@ -74,7 +77,7 @@ module FactoryBot
       # Create a set of objects by <code>create</code> build strategy in FactoryBot.
       # See {.plan} for more details.
       # @param blueprint [Factrey::Blueprint, nil]
-      # @param ext [Object] an external object that can be accessed using {DSL#ext} in the DSL
+      # @param ext [Object] an external object that can be accessed using <code>DSL#ext</code> in the DSL
       # @yield Write Blueprint DSL code here
       # @return [Hash{Symbol => Object}] the created objects
       def create(blueprint = nil, ext: nil, &) = instantiate(:create, blueprint, ext:, &)
