@@ -70,7 +70,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
   end
 
   describe "#letbp" do
-    letbp(:user, %i[blog article], strategy: :build) do
+    letbp(:user, %i[blog article]).build do
       user(name: "User 1")
       user(name: "User 2") do
         let.blog(title: "User 2 Blog") do
@@ -89,7 +89,7 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
     end
 
     describe "inherit: true" do
-      letbp(:user, %i[article2], inherit: true) do
+      letbp(:user, %i[article2]).inherit do
         on.blog do
           let.article2 = article(title: "Article 3")
         end
@@ -120,8 +120,8 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
   describe "#let_blueprint_build!" do
     let_blueprint(:source) { let.user(name: "John") }
 
-    let_blueprint_build source: { result: :foo, instance: :instance_for_foo }
-    let_blueprint_build! source: { result: :bar, instance: :instance_for_bar }
+    let_blueprint_build(source: { result: :foo, instance: :instance_for_foo })
+    let_blueprint_build!(source: { result: :bar, instance: :instance_for_bar })
 
     it "is evaluated before tests" do
       FactoryBot::Blueprint.plan(source) { on.user(name: "Jane") }
@@ -138,8 +138,8 @@ RSpec.describe FactoryBot::Blueprint::RSpec::Driver do
   describe "#letbp!" do
     let(:user_name) { { value: "John" } }
 
-    letbp(:foo, strategy: :build) { user(name: ext.user_name[:value]) }
-    letbp!(:bar, strategy: :build) { user(name: ext.user_name[:value]) }
+    letbp(:foo).build { user(name: ext.user_name[:value]) }
+    letbp!(:bar).build { user(name: ext.user_name[:value]) }
 
     it "is evaluated before tests" do
       user_name[:value] = "Jane"

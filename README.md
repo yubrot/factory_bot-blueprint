@@ -277,7 +277,7 @@ let(:comment) { blog_blueprint_instance[:comment] }
 
 ```ruby
 # Define a blog, an article, and a comment from the instance of the blueprint described in the block
-letbp(:blog, %i[article comment]) do
+letbp(:blog, %i[article comment]).build do
   blog(title: "Daily log") do
     let.article(title: "Article 1") { let.comment(text: "foo") }
     article(title: "Article 2")
@@ -286,13 +286,13 @@ letbp(:blog, %i[article comment]) do
 end
 ```
 
-`letbp` can be broken down into separate helper methods: `let_blueprint` and `let_blueprint_build` (or `let_blueprint_create`). For more details, see [`factory_bot-blueprint-rspec` API Doc](https://rubydoc.info/gems/factory_bot-blueprint-rspec/FactoryBot/Blueprint/RSpec/Driver).
+`letbp` can be broken down into separate helper methods: `let_blueprint` and `let_blueprint_<build_strategy>`. For more details, see [`factory_bot-blueprint-rspec` API Doc](https://rubydoc.info/gems/factory_bot-blueprint-rspec/FactoryBot/Blueprint/RSpec/Driver).
 
-`letbp` also accepts the options `inherit` and `strategy`:
+Yon can also use `letbp(...).inherit` to extend `super()` blueprint.
 
 ```ruby
 RSpec.describe "something" do
-  letbp(:blog, strategy: :build) do   # By default letbp uses :create strategy, :strategy option overwrites it
+  letbp(:blog, %i[article]).create do
     blog(title: "Daily log") do
       let.article(title: "Article 1")
       article(title: "Article 2")
@@ -301,7 +301,7 @@ RSpec.describe "something" do
   end
 
   context "with some comments on the article 1" do
-    letbp(:blog, inherit: true) do    # Extends super() blueprint by set :inherit option to true
+    letbp(:blog).inherit do
       on.article do
         comment(text: "Comment 1")
         comment(text: "Comment 2")
