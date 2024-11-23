@@ -1,6 +1,7 @@
 ## [Unreleased]
 
 - Added: Add `build_stubbed` build strategy support
+- Added: Add `FactoryBot::Blueprint::Methods`
 
 ## [0.4.0] - 2024/08/13
 

@@ -4,6 +4,7 @@ require "factrey"
 require "factory_bot"
 require_relative "blueprint/version"
 require_relative "blueprint/dsl"
+require_relative "blueprint/methods"
 
 module FactoryBot
   # A FactoryBot extension for building structured objects using a declarative DSL.

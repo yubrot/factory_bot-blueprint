@@ -69,6 +69,27 @@ end
 # :_result_ => #<User name="User 2">}
 ```
 
+Optionally you can use a shortcut method by including `FactoryBot::Blueprint::Methods`.
+
+```ruby
+# If you are using RSpec, you can configure the same way as FactoryBot::Syntax::Methods:
+RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
+  config.include FactoryBot::Blueprint::Methods
+end
+
+# You can use `bp` in your spec files
+RSpec.describe "something" do
+  before do
+    bp.create do
+      user(name: "Kevin")
+      user(name: "User 1")
+      user(name: "User 2")
+    end
+  end
+end
+```
+
 ### The Blueprint DSL
 
 This section will go through the primary features of the Blueprint DSL. All DSL APIs can be found in the [`factrey` API Doc](https://rubydoc.info/gems/factrey/Factrey/DSL).

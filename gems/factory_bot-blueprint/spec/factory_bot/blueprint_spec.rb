@@ -10,10 +10,8 @@ RSpec.describe FactoryBot::Blueprint do
   end
 
   describe ".build" do
-    def build(&) = described_class.build(&)
-
     context "with an empty blueprint" do
-      subject { build }
+      subject { bp.build }
 
       it "creates no objects" do
         expect(subject).to eq(_result_: nil)
@@ -21,7 +19,7 @@ RSpec.describe FactoryBot::Blueprint do
     end
 
     context "with a node" do
-      subject { build { user } }
+      subject { bp.build { user } }
 
       it "creates a object and the object is used as a result" do
         expect(subject.values).to eq [
@@ -33,7 +31,7 @@ RSpec.describe FactoryBot::Blueprint do
 
     context "with multiple nodes" do
       subject do
-        build do
+        bp.build do
           user(name: "A")
           user(name: "B")
           user(name: "C")
@@ -51,7 +49,7 @@ RSpec.describe FactoryBot::Blueprint do
     end
 
     context "with an unknown factory" do
-      subject { build { unknown } }
+      subject { bp.build { unknown } }
 
       it "is an error" do
         expect { subject }.to raise_error NoMethodError
@@ -60,7 +58,7 @@ RSpec.describe FactoryBot::Blueprint do
 
     context "with FactoryBot aliases" do
       subject do
-        build do
+        bp.build do
           let.user(name: "A") do
             let.user_account = account
             let.user_post = post
@@ -104,7 +102,7 @@ RSpec.describe FactoryBot::Blueprint do
 
     context "with FactoryBot parents and same type associations" do
       subject do
-        build do
+        bp.build do
           let.color(code: "red") { let.color_grad = gradient }
           let.white { let.white_grad = gradient }
         end
@@ -122,7 +120,7 @@ RSpec.describe FactoryBot::Blueprint do
 
     context "with FactoryBot parents and autocompletion" do
       subject do
-        build do
+        bp.build do
           let.customer(id: 1) { let.profile(name: "John") }
           let.premium_customer(id: 2) { let.premium_customer_profile = profile(name: "Doe") }
         end
@@ -140,7 +138,7 @@ RSpec.describe FactoryBot::Blueprint do
 
     context "with FactoryBot traits and same field associations" do
       subject do
-        build do
+        bp.build do
           let.video(title: "A") do
             let.video_tag = tag
             let.video_photo = photo(title: "A-1") { let.video_photo_tag = tag }
@@ -174,7 +172,7 @@ RSpec.describe FactoryBot::Blueprint do
 
     context "with FactoryBot inline associations" do
       subject do
-        build do
+        bp.build do
           let.school(name: "S") do
             let.a = student(name: "A")
             let.b = profile(name: "B")
