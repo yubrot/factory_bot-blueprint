@@ -37,7 +37,7 @@ module Factrey
     # @yieldparam ref [Ref]
     # @return [Ref]
     def object_node(name, type, ...)
-      node = @blueprint.add_node(Blueprint::Node.new(name, type, ancestors: @ancestors))
+      node = @blueprint.add_node(Blueprint::Node.new(name, type, parent: @ancestors.last))
       on(node.name, ...)
     end
 
@@ -47,7 +47,7 @@ module Factrey
     # @param name [Symbol, nil]
     # @param value [Object]
     def computed_node(name, value)
-      node = @blueprint.add_node(Blueprint::Node.computed(name, value, ancestors: @ancestors))
+      node = @blueprint.add_node(Blueprint::Node.computed(name, value, parent: @ancestors.last))
       node.to_ref
     end
 

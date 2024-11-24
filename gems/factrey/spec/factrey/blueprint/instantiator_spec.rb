@@ -110,8 +110,8 @@ RSpec.describe Factrey::Blueprint::Instantiator do
     context "with auto references" do
       before do
         foo = blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
-        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, ancestors: [foo]))
-        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, post, ancestors: [foo, bar]))
+        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, parent: foo))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, post, parent: bar))
       end
 
       it "creates objects with auto references" do
@@ -126,8 +126,8 @@ RSpec.describe Factrey::Blueprint::Instantiator do
     context "with auto references and multiple candidates in ancestors" do
       before do
         foo = blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
-        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, author, ancestors: [foo]))
-        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, blog, ancestors: [foo, bar]))
+        bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, author, parent: foo))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, blog, parent: bar))
       end
 
       it "creates objects with auto references and the nearest ancestor is selected" do
@@ -142,7 +142,7 @@ RSpec.describe Factrey::Blueprint::Instantiator do
     context "with auto references and compatible types" do
       before do
         foo = blueprint.add_node(Factrey::Blueprint::Node.new(:foo, guest_author))
-        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, ancestors: [foo]))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:bar, blog, parent: foo))
       end
 
       it "creates objects with auto references and compatible types are also considered" do
@@ -157,7 +157,7 @@ RSpec.describe Factrey::Blueprint::Instantiator do
       before do
         blueprint.add_node(Factrey::Blueprint::Node.new(:foo, author))
         bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, author))
-        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, blog, ancestors: [bar], kwargs: { author: ref.foo }))
+        blueprint.add_node(Factrey::Blueprint::Node.new(:baz, blog, parent: bar, kwargs: { author: ref.foo }))
       end
 
       it "creates objects and explicit arguments take precedence" do

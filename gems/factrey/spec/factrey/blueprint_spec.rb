@@ -8,7 +8,7 @@ RSpec.describe Factrey::Blueprint do
     blueprint.add_node(Factrey::Blueprint::Node.new(:foo, ty_a))
     bar = blueprint.add_node(Factrey::Blueprint::Node.new(:bar, ty_a))
     blueprint.add_node(
-      Factrey::Blueprint::Node.new(:baz, ty_b, ancestors: [bar], args: [1, 2], kwargs: { hello: "world" }),
+      Factrey::Blueprint::Node.new(:baz, ty_b, parent: bar, args: [1, 2], kwargs: { hello: "world" }),
     )
     blueprint
   end
@@ -22,21 +22,21 @@ RSpec.describe Factrey::Blueprint do
           foo: have_attributes(
             name: :foo,
             type: ty_a,
-            ancestors: [],
+            parent: nil,
             args: [],
             kwargs: {},
           ),
           bar: have_attributes(
             name: :bar,
             type: ty_a,
-            ancestors: [],
+            parent: nil,
             args: [],
             kwargs: {},
           ),
           baz: have_attributes(
             name: :baz,
             type: ty_b,
-            ancestors: [subject.nodes[:bar]],
+            parent: subject.nodes[:bar],
             args: [1, 2],
             kwargs: { hello: "world" },
           ),

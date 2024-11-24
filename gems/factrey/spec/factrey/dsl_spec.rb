@@ -88,7 +88,7 @@ RSpec.describe Factrey::DSL do
           have_attributes(
             name: start_with("_anon_"),
             type: user,
-            ancestors: [],
+            parent: nil,
             args: [],
             kwargs: {},
           ),
@@ -127,12 +127,12 @@ RSpec.describe Factrey::DSL do
           end
         end
 
-        it "adds nodes and nodes ancestors reflects structures" do
+        it "adds nodes and node parents reflects structures" do
           expect(subject.nodes.values.to_a).to match [
-            have_attributes(args: [1], ancestors: []),
-            have_attributes(args: [2], ancestors: [0].map { subject.nodes.values[_1] }),
-            have_attributes(args: [3], ancestors: [0, 1].map { subject.nodes.values[_1] }),
-            have_attributes(args: [4], ancestors: [0, 1].map { subject.nodes.values[_1] }),
+            have_attributes(args: [1], parent: nil),
+            have_attributes(args: [2], parent: subject.nodes.values[0]),
+            have_attributes(args: [3], parent: subject.nodes.values[1]),
+            have_attributes(args: [4], parent: subject.nodes.values[1]),
             have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
           ]
         end
@@ -148,7 +148,7 @@ RSpec.describe Factrey::DSL do
           end
         end
 
-        it "adds nodes and nodes ancestors reflects structures" do
+        it "adds nodes reflects structures" do
           expect(subject.nodes.values.to_a).to match [
             have_attributes(args: [1], kwargs: {}),
             have_attributes(args: [2], kwargs: { user: subject.nodes.values[0].to_ref }),
@@ -167,7 +167,7 @@ RSpec.describe Factrey::DSL do
           have_attributes(
             name: :foo,
             type: Factrey::Blueprint::Type::COMPUTED,
-            ancestors: [],
+            parent: nil,
             args: [123],
             kwargs: {},
           ),
@@ -255,7 +255,7 @@ RSpec.describe Factrey::DSL do
         )
         expect(subject.resolve_node(:user2)).to have_attributes(
           args: [78],
-          ancestors: [subject.resolve_node(:user)],
+          parent: subject.resolve_node(:user),
         )
         expect(subject.nodes.values.last).to have_attributes(
           args: [Factrey::Ref.new(subject.resolve_node(:user).name)],
@@ -275,11 +275,11 @@ RSpec.describe Factrey::DSL do
         end
 
         it "does not affect ancestors outside block" do
-          expect(subject.resolve_node(:user1)).to have_attributes(ancestors: [])
-          expect(subject.resolve_node(:user2)).to have_attributes(ancestors: [])
-          expect(subject.resolve_node(:user3)).to have_attributes(ancestors: [subject.resolve_node(:user2)])
-          expect(subject.resolve_node(:user4)).to have_attributes(ancestors: [subject.resolve_node(:user1)])
-          expect(subject.resolve_node(:user5)).to have_attributes(ancestors: [subject.resolve_node(:user2)])
+          expect(subject.resolve_node(:user1)).to have_attributes(parent: nil)
+          expect(subject.resolve_node(:user2)).to have_attributes(parent: nil)
+          expect(subject.resolve_node(:user3)).to have_attributes(parent: subject.resolve_node(:user2))
+          expect(subject.resolve_node(:user4)).to have_attributes(parent: subject.resolve_node(:user1))
+          expect(subject.resolve_node(:user5)).to have_attributes(parent: subject.resolve_node(:user2))
         end
       end
 

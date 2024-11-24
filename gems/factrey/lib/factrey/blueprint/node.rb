@@ -16,34 +16,32 @@ module Factrey
       attr_reader :name
       # @return [Type] type of the object
       attr_reader :type
-      # @return [Array<Node>] list of ancestor nodes, from root to terminal nodes
-      attr_reader :ancestors
+      # @return [Node, nil] parent node
+      attr_reader :parent
       # @return [Array<Object>] positional arguments to be passed to the factory
       attr_reader :args
       # @return [Hash{Object => Object}] keyword arguments to be passed to the factory
       attr_reader :kwargs
 
-      def initialize(name, type, ancestors: [], args: [], kwargs: {})
+      def initialize(name, type, parent: nil, args: [], kwargs: {})
         raise TypeError, "name must be a Symbol" if name && !name.is_a?(Symbol)
         raise TypeError, "type must be a Blueprint::Type" unless type.is_a? Blueprint::Type
-        unless ancestors.is_a?(Array) && ancestors.all? { _1.is_a?(Node) }
-          raise TypeError, "ancestors must be an Array of Nodes"
-        end
+        raise TypeError, "parent must be a Node" if parent && !parent.is_a?(Node)
         raise TypeError, "args must be an Array" unless args.is_a? Array
         raise TypeError, "kwargs must be a Hash" unless kwargs.is_a? Hash
 
         @name = name || :"#{ANONYMOUS_NAME_PREFIX}#{SecureRandom.hex(6)}"
         @type = type
-        @ancestors = ancestors
+        @parent = parent
         @args = args
         @kwargs = kwargs
       end
 
       # @param name [Symbol, nil]
       # @param value [Object]
-      # @param ancestors [Array<Node>]
-      def self.computed(name, value, ancestors: [])
-        new(name, Blueprint::Type::COMPUTED, ancestors:, args: [value])
+      # @param parent [Node, nil]
+      def self.computed(name, value, parent: nil)
+        new(name, Blueprint::Type::COMPUTED, parent:, args: [value])
       end
 
       # @return [Boolean]
@@ -64,6 +62,8 @@ module Factrey
           nil
         end
       end
+
+      def ancestors = parent ? [parent].concat(parent.ancestors) : []
 
       # Used for debugging and error reporting.
       # @return [String]

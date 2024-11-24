@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Factrey::Blueprint::Node do
-  let(:node) { described_class.new(:foo, Factrey::Blueprint::Type.new(:user) { nil }) }
+  let(:node) { described_class.new(:foo, user_type) }
+  let(:user_type) { Factrey::Blueprint::Type.new(:user) { nil } }
 
   describe "#anonymous?" do
     subject { node.anonymous? }
@@ -11,7 +12,7 @@ RSpec.describe Factrey::Blueprint::Node do
     end
 
     context "when the node is not named" do
-      let(:node) { described_class.new(nil, Factrey::Blueprint::Type.new(:user) { nil }) }
+      let(:node) { described_class.new(nil, user_type) }
 
       it { is_expected.to be true }
     end
@@ -48,6 +49,22 @@ RSpec.describe Factrey::Blueprint::Node do
       let(:node) { described_class.computed(:foo, Factrey::Ref.new(:bar)) }
 
       it { is_expected.to eq Factrey::Ref.new(:bar) }
+    end
+  end
+
+  describe "#ancestors" do
+    subject { node.ancestors }
+
+    let(:node) { nodes[:baz] }
+    let(:nodes) do
+      foo = described_class.new(:foo, user_type)
+      bar = described_class.new(:bar, user_type, parent: foo)
+      baz = described_class.new(:baz, user_type, parent: bar)
+      { foo:, bar:, baz: }
+    end
+
+    it "returns ancestor nodes in order of closeness" do
+      expect(subject).to match [nodes[:bar], nodes[:foo]]
     end
   end
 

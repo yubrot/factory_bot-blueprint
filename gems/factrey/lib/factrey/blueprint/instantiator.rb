@@ -56,7 +56,7 @@ module Factrey
         auto_references.each do |type_name, attribute|
           next if dest.member? attribute # this attribute is explicitly specified
 
-          compatible_node, index = referenceable_nodes.reverse_each.with_index.find do |node, _|
+          compatible_node, index = referenceable_nodes.each_with_index.find do |node, _|
             node.type.compatible_types.include?(type_name)
           end
           next unless compatible_node

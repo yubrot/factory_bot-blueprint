@@ -25,7 +25,7 @@ module Factrey
           node.name,
           node.type,
           # This is OK since Hash insertion order in Ruby is retained
-          ancestors: node.ancestors.map { result.nodes[_1.name] },
+          parent: node.parent&.then { result.nodes[_1.name] },
           args: node.args.dup,
           kwargs: node.kwargs.dup,
         )
