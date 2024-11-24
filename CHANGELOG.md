@@ -3,6 +3,7 @@
 - Added: Add `build_stubbed` build strategy support
 - Added: Add `FactoryBot::Blueprint::Methods`
 - **Changed**: `letbp` syntax changed to `letbp(...).<build_strategy>`
+- **Changed**: Drop out Ruby 3.1 support
 
 ## [0.4.0] - 2024/08/13
 

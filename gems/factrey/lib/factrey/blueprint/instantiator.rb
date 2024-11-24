@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module Factrey
   class Blueprint
     # An internal class used by {Blueprint#instantiate}.

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "set"
-
 module Factrey
   class Blueprint
     # A type representation on Factrey blueprints.
