@@ -26,7 +26,7 @@ module FactoryBot
         #     # Above example will be expanded to ...
         #
         #     # Create a blueprint:
-        #     let(:blog_blueprint) do
+        #     let(:_letbp_blog_blueprint) do
         #       FactoryBot::Blueprint.plan(ext: self) do
         #         blog(title: "Daily log") do
         #           let.article(title: "Article 1")
@@ -37,13 +37,13 @@ module FactoryBot
         #     end
         #
         #     # Create a set of objects (with `build` build strategy) from it:
-        #     let(:blog_instance) { FactoryBot::Blueprint.build(blog_blueprint) }
+        #     let(:_letbp_blog_instance) { FactoryBot::Blueprint.build(_letbp_blog_blueprint) }
         #
         #     # Declare the result object:
-        #     let(:blog) { blog_instance[Factrey::Blueprint::Node::RESULT_NAME] }
+        #     let(:blog) { _letbp_blog_instance[Factrey::Blueprint::Node::RESULT_NAME] }
         #
         #     # Declare the named objects:
-        #     let(:article) { blog_instance[:article] }
+        #     let(:article) { _letbp_blog_instance[:article] }
         #   end
         def letbp(name, items = []) = Letbp.new(self, :lazy, name, items)
 

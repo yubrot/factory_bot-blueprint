@@ -25,41 +25,66 @@ module FactoryBot
         end
 
         # Create a new blueprint, and create a set of objects (with <code>build</code> build strategy) from it.
+        # @yield Write Blueprint DSL code here
+        # @example
+        #   letbp(:blog, %i[article]).build do
+        #     blog(title: "Daily log") do
+        #       let.article(title: "Article 1")
+        #       article(title: "Article 2")
+        #       article(title: "Article 3")
+        #     end
+        #   end
         def build(&)
           let_blueprint(:new, &)
           let_instance(:build)
           let_objects
         end
 
-        # Create a set of objects (with <code>build</code> build strategy) from an existing blueprint.
-        def build_from(&)
-          let_blueprint(:from, &)
-          let_instance(:build)
-          let_objects
-        end
-
         # Create a new blueprint, and create a set of objects (with <code>build_stubbed</code> build strategy) from it.
+        # @yield Write Blueprint DSL code here
         def build_stubbed(&)
           let_blueprint(:new, &)
           let_instance(:build_stubbed)
           let_objects
         end
 
-        # Create a set of objects (with <code>build_stubbed</code> build strategy) from an existing blueprint.
-        def build_stubbed_from(&)
-          let_blueprint(:from, &)
-          let_instance(:build_stubbed)
-          let_objects
-        end
-
         # Create a new blueprint, and create a set of objects (with <code>create</code> build strategy) from it.
+        # @yield Write Blueprint DSL code here
         def create(&)
           let_blueprint(:new, &)
           let_instance(:create)
           let_objects
         end
 
+        # Create a set of objects (with <code>build</code> build strategy) from an existing blueprint.
+        # @yield Usual let context for retrieving an existing blueprint
+        # @example
+        #   let(:blog_blueprint) do
+        #     bp.plan do
+        #       blog(title: "Daily log") do
+        #         let.article(title: "Article 1")
+        #         article(title: "Article 2")
+        #         article(title: "Article 3")
+        #       end
+        #     end
+        #   end
+        #   letbp(:blog, %i[article]).build_from { blog_blueprint }
+        def build_from(&)
+          let_blueprint(:from, &)
+          let_instance(:build)
+          let_objects
+        end
+
+        # Create a set of objects (with <code>build_stubbed</code> build strategy) from an existing blueprint.
+        # @yield Usual let context for retrieving an existing blueprint
+        def build_stubbed_from(&)
+          let_blueprint(:from, &)
+          let_instance(:build_stubbed)
+          let_objects
+        end
+
         # Create a set of objects (with <code>create</code> build strategy) from an existing blueprint.
+        # @yield Usual let context for retrieving an existing blueprint
         def create_from(&)
           let_blueprint(:from, &)
           let_instance(:create)
@@ -67,6 +92,7 @@ module FactoryBot
         end
 
         # Extend <code>super()</code> blueprint.
+        # @yield Write Blueprint DSL code here
         # @example
         #   RSpec.describe "something" do
         #     letbp(:blog, %i[article]).build do
