@@ -95,6 +95,7 @@ GEM
       rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
     securerandom (0.3.2)
+    test-prof (1.4.2)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
@@ -112,6 +113,7 @@ DEPENDENCIES
   rspec (~> 3.0)
   rubocop (~> 1.63)
   rubocop-rspec (~> 2.29)
+  test-prof (~> 1.0)
 
 BUNDLED WITH
    2.5.15

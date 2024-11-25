@@ -286,8 +286,6 @@ letbp(:blog, %i[article comment]).build do
 end
 ```
 
-`letbp` can be broken down into separate helper methods: `let_blueprint` and `let_blueprint_<build_strategy>`. For more details, see [`factory_bot-blueprint-rspec` API Doc](https://rubydoc.info/gems/factory_bot-blueprint-rspec/FactoryBot/Blueprint/RSpec/Driver).
-
 Yon can also use `letbp(...).inherit` to extend `super()` blueprint.
 
 ```ruby
@@ -317,15 +315,7 @@ If you are using [`rubocop-rspec`](https://github.com/rubocop/rubocop-rspec), yo
 RSpec:
   Language:
     Helpers:
-      - let_blueprint
-      - let_blueprint_build
-      - let_blueprint_build_stubbed
-      - let_blueprint_create
       - letbp
-      - let_blueprint!
-      - let_blueprint_build!
-      - let_blueprint_build_stubbed!
-      - let_blueprint_create!
       - letbp!
 ```
 
