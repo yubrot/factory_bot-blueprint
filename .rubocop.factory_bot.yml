@@ -1,0 +1,5 @@
+require:
+  - rubocop-factory_bot
+
+FactoryBot:
+  Enabled: true

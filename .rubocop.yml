@@ -13,11 +13,11 @@ RSpec:
       - letbp
       - letbp!
 
-Style/StringLiterals:
-  EnforcedStyle: double_quotes
-
 Style/NumberedParametersLimit:
   Max: 2
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
