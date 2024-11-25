@@ -68,6 +68,55 @@ RSpec.describe Factrey::Blueprint::Node do
     end
   end
 
+  describe "#auto_referenced_ancestors" do
+    subject { node.auto_referenced_ancestors }
+
+    let(:user_type) { Factrey::Blueprint::Type.new(:user) { nil } }
+    let(:post_type) { Factrey::Blueprint::Type.new(:post, auto_references: { user: :author }) { nil } }
+
+    context "when the type of node has no auto-reference candidates" do
+      let(:node) { described_class.new(:foo, user_type) }
+
+      it "auto-references nothing" do
+        expect(subject).to eq({})
+      end
+    end
+
+    context "when the node has no ancestors" do
+      let(:node) { described_class.new(:foo, post_type) }
+
+      it "auto-references nothing" do
+        expect(subject).to eq({})
+      end
+    end
+
+    context "when the node has compatible ancestors" do
+      let(:node) { described_class.new(:foo, post_type, parent: user_node) }
+      let(:user_node) { described_class.new(:bar, user_type) }
+
+      it "auto-references the compatible ancestor" do
+        expect(subject).to eq(author: user_node)
+      end
+
+      context "when the attribute being auto-referenced is explicitly speicifed" do
+        let(:node) { described_class.new(:foo, post_type, parent: user_node, kwargs: { author: nil }) }
+
+        it "auto-references nothing" do
+          expect(subject).to eq({})
+        end
+      end
+
+      context "when there are more than one compatible ancestors" do
+        let(:node) { described_class.new(:foo, post_type, parent: another_user_node) }
+        let(:another_user_node) { described_class.new(:baz, user_type, parent: user_node) }
+
+        it "auto-references the closer ancestor" do
+          expect(subject).to eq(author: another_user_node)
+        end
+      end
+    end
+  end
+
   describe "#type_annotated_name" do
     subject { node.type_annotated_name }
 

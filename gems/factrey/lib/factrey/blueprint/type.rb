@@ -12,13 +12,12 @@ module Factrey
       attr_reader :compatible_types
       # @return [Hash{Symbol => Symbol}] a name-to-attribute mapping for auto-referencing
       attr_reader :auto_references
-      # @return [Proc] procedure that actually creates an object. See {Blueprint::Instantiator} implementation
-      attr_reader :factory
 
       # @param name [Symbol]
       # @param compatible_types [Array<Symbol>, Symbol]
       # @param auto_references [Hash{Symbol => Symbol}, Array<Symbol>, Symbol]
       # @yield [type, context, *args, **kwargs]
+      #   procedure that actually creates an object. See {Blueprint::Instantiator} implementation
       def initialize(name, compatible_types: [], auto_references: {}, &factory)
         compatible_types = [compatible_types] if compatible_types.is_a? Symbol
         auto_references = [auto_references] if auto_references.is_a? Symbol
@@ -41,8 +40,16 @@ module Factrey
         @factory = factory
       end
 
-      # A special type that represents values computed from other objects.
-      COMPUTED = Type.new(:_computed) { |_, _, arg| arg }
+      # Create an object of this type.
+      # @param context [Object] the context object that is passed to the factory
+      # @param args [Array<Object>] positional arguments for the factory
+      # @param kwargs [Hash{Symbol => Object}] keyword arguments for the factory
+      def create_object(context, *, **)
+        @factory.call(self, context, *, **)
+      end
+
+      # A special type that represents values computed from other objects. See {Node.computed}.
+      COMPUTED = new(:_computed) { |_, _, arg| arg }
     end
   end
 end

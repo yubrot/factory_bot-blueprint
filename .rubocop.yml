@@ -24,6 +24,9 @@ RSpec:
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
+Style/NumberedParametersLimit:
+  Max: 2
+
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
 

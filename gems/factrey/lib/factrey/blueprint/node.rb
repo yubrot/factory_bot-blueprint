@@ -54,7 +54,7 @@ module Factrey
 
       # @return [Ref, nil] if this node works as an alias to another node, return the reference to the node
       def alias_ref
-        case [@type, args]
+        case [type, args]
         in Blueprint::Type::COMPUTED, [Ref => ref]
           ref
         else
@@ -62,7 +62,28 @@ module Factrey
         end
       end
 
+      # @return [Array<Node>] a list of ancestor nodes
       def ancestors = parent ? [parent].concat(parent.ancestors) : []
+
+      # @return [Hash{Symbol => Node}] a map from attributes to auto-referenced ancestor nodes
+      def auto_referenced_ancestors
+        ancestors = self.ancestors
+        candidates = {}
+        type.auto_references.each do |type_name, attribute|
+          next if kwargs.member? attribute # this attribute is explicitly specified
+
+          # closer ancestors have higher (lower integer) priority
+          compatible_node, priority = ancestors.each_with_index.find do |node, _|
+            node.type.compatible_types.include?(type_name)
+          end
+          next unless compatible_node
+          next if candidates.member?(attribute) && candidates[attribute][0] <= priority
+
+          candidates[attribute] = [priority, compatible_node]
+        end
+
+        candidates.transform_values { _2 }
+      end
 
       # Used for debugging and error reporting.
       # @return [String]

@@ -92,7 +92,11 @@ RSpec.describe Factrey::DSL do
             args: [],
             kwargs: {},
           ),
-          have_attributes(args: [Factrey::Ref.new(subject.nodes.values[0].name)]), # result
+          have_attributes(
+            name: :_result_,
+            type: Factrey::Blueprint::Type::COMPUTED,
+            args: [Factrey::Ref.new(subject.nodes.values[0].name)],
+          ),
         ]
       end
 
@@ -110,7 +114,11 @@ RSpec.describe Factrey::DSL do
             have_attributes(args: [123]),
             have_attributes(kwargs: { foo: 456 }),
             have_attributes(args: [], kwargs: {}),
-            have_attributes(args: [Factrey::Ref.new(subject.nodes.values[2].name)]), # result
+            have_attributes(
+              name: :_result_,
+              type: Factrey::Blueprint::Type::COMPUTED,
+              args: [Factrey::Ref.new(subject.nodes.values[2].name)],
+            ),
           ]
         end
       end

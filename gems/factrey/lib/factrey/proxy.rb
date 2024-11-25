@@ -15,16 +15,18 @@ module Factrey
   class Proxy < BasicObject
     # @param receiver [Object]
     # @param method [Symbol]
-    def initialize(receiver, method)
+    # @param preargs [Array<Object>]
+    def initialize(receiver, method, *preargs)
       @receiver = receiver
       @method = method
+      @preargs = preargs
     end
 
     # @!visibility private
     def respond_to_missing?(_method_name, _) = true
 
     def method_missing(method_name, ...)
-      @receiver.__send__(@method, method_name, ...)
+      @receiver.__send__(@method, *@preargs, method_name, ...)
     end
   end
 end

@@ -64,9 +64,9 @@ module FactoryBot
           Factrey::Blueprint::Type.new(type_name, compatible_types:, auto_references:, &FACTORY)
         end
 
-        FACTORY = lambda { |type, context, *args, **kwargs|
+        FACTORY = lambda do |type, context, *args, **kwargs|
           FactoryBot.__send__(context[:build_strategy], type.name, *args, **kwargs)
-        }
+        end
 
         private_constant :FACTORY
       end
