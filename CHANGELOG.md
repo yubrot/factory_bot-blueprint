@@ -1,5 +1,7 @@
 ## [Unreleased]
 
+## [0.5.0] - 2024/11/27
+
 - Added: Added `:build_stubbed` build strategy support
 - Added: Added `FactoryBot::Blueprint::Methods`
 - Added: Added `letbp_it_be`, a `let_it_be` version of `letbp`
