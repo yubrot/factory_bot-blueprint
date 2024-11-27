@@ -5,6 +5,8 @@
 
 `factory_bot-blueprint` is a FactoryBot extension for building structured objects using a declarative DSL.
 
+We recommend using this gem only when it's really necessary. [factory_bot-with](https://github.com/yubrot/factory_bot-with), a lightweight gem that shares the same philosophy, is also available and worth considering.
+
 ## Installation
 
 FactoryBot::Blueprint provides three gems.
